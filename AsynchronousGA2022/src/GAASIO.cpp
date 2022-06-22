@@ -57,7 +57,7 @@ int main(int argc, const char **argv)
     std::string compileDate(__DATE__);
     std::string compileTime(__TIME__);
     ArgParse argparse;
-    argparse.Initialise(argc, argv, "AsynchronousGA2022 distributed genatic algorithm program "s + compileDate + " "s + compileTime, 0, 0);
+    argparse.Initialise(argc, argv, "AsynchronousGA2022 distributed genetic algorithm program "s + compileDate + " "s + compileTime, 0, 0);
     // required arguments
     argparse.AddArgument("-p"s, "--parameterFile"s, "Parameter file specifying the GA options"s, ""s, 1, true, ArgParse::String);
     argparse.AddArgument("-b"s, "--baseXMLFile"s, "Base XML file that is optimised"s, ""s, 1, true, ArgParse::String);

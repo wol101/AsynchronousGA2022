@@ -49,7 +49,7 @@ target_include_directories(AsynchronousGA2022 PRIVATE
 )
 
 if (MSVC)
-    target_compile_options(AsynchronousGA2022 PRIVATE /bigobj)
+    target_compile_options(AsynchronousGA2022 PRIVATE /bigobj /MT)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS _WINSOCK_DEPRECATED_NO_WARNINGS _WIN32_WINNT=_WIN32_WINNT_WIN7)
 endif ()
 

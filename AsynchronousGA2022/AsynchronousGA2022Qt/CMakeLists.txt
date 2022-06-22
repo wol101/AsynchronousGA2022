@@ -93,7 +93,10 @@ if(QT_VERSION_MAJOR EQUAL 6)
 endif()
 
 if (MSVC)
-    target_compile_options(AsynchronousGA2022Qt PRIVATE /bigobj)
+    # these flags are initially set under Qt Creator/Projects/Current Configuration/Advanced
+    set(CMAKE_CXX_FLAGS_RELEASE "/bigobj /MT /O2 /Ob2 /DNDEBUG") # default flags except adding /bigobj and /MT instead of /MD
+    set(CMAKE_CXX_FLAGS_DEBUG "/bigobj /MDd /Zi /Ob0 /Od /RTC1") # default flags except adding /bigobj
+    # target_compile_options(AsynchronousGA2022Qt PRIVATE /bigobj /MT)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif ()
 

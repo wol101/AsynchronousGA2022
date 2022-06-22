@@ -1346,12 +1346,22 @@ void AsynchronousGAQtWidget::font()
 
 void AsynchronousGAQtWidget::about()
 {
+    QString description(u8"This application coordinates optimisation using \nremote clients to do the hard work.\n\u00a9 William Sellers 2022.\nReleased under GPL v3.");
+    QString buildDate = QString("Build: %1 %2").arg(__DATE__, __TIME__);
+    QString buildType;
+#ifdef NDEBUG
+    buildType = "Release";
+#else
+    buildType = "Debug";
+#endif
+    QString buildInformation = QSysInfo::buildAbi();
+
     QMessageBox msgBox;
-    msgBox.setText(tr("<b>AsynchronousGAQt</b> Genetic Algorithm Server"));
-    msgBox.setInformativeText(tr("This application coordinates optimisation using remote clients to do the hard work.\nCopyright William Sellers 2022.\nReleased under GPL v3."));
+    msgBox.setText(tr("<b>AsynchronousGAQt</b>: Genetic Algorithm Server"));
+    msgBox.setInformativeText(QString("%1\n%2 %3\n%4").arg(description, buildDate, buildType, buildInformation));
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setDefaultButton(QMessageBox::Ok);
-    msgBox.setIconPixmap(QPixmap(":/Images/icon_design.svg").scaledToWidth(256));
+    msgBox.setIconPixmap(QIcon(":/Images/icon_design.svg").pixmap(QSize(256, 256))); // going via a QIcon means the scaling happens before the conversion to a pixmap
     int ret = msgBox.exec();
     switch (ret)
     {
