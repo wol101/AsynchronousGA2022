@@ -721,7 +721,7 @@ void AsynchronousGAQtWidget::activateButtons()
     ui->pushButtonWorkingFolder->setEnabled(m_ga == nullptr && m_runMergeXML == 0 && ui->checkBoxMergeXMLActivate->isChecked());
     ui->pushButtonMergeXMLFile->setEnabled(m_ga == nullptr && m_runMergeXML == 0 && ui->checkBoxMergeXMLActivate->isChecked());
     ui->pushButtonGaitSymExecutable->setEnabled(m_ga == nullptr && m_runMergeXML == 0 && ui->checkBoxMergeXMLActivate->isChecked());
-    ui->pushButtonGAExecutable->setEnabled(m_ga == nullptr && m_runMergeXML == 0 && ui->checkBoxMergeXMLActivate->isChecked());
+    ui->pushButtonGAExecutable->setEnabled(m_ga == nullptr && m_runMergeXML == 0);
     ui->lineEditOutputFolder->setEnabled(m_ga == nullptr && m_runMergeXML == 0 && !ui->checkBoxMergeXMLActivate->isChecked());
     ui->lineEditParameterFile->setEnabled(m_ga == nullptr && m_runMergeXML == 0);
     ui->lineEditXMLMasterFile->setEnabled(m_ga == nullptr && m_runMergeXML == 0 && !ui->checkBoxMergeXMLActivate->isChecked());
@@ -732,7 +732,7 @@ void AsynchronousGAQtWidget::activateButtons()
     ui->lineEditWorkingFolder->setEnabled(m_ga == nullptr && m_runMergeXML == 0 && ui->checkBoxMergeXMLActivate->isChecked());
     ui->lineEditMergeXMLFile->setEnabled(m_ga == nullptr && m_runMergeXML == 0 && ui->checkBoxMergeXMLActivate->isChecked());
     ui->lineEditGaitSymExecutable->setEnabled(m_ga == nullptr && m_runMergeXML == 0 && ui->checkBoxMergeXMLActivate->isChecked());
-    ui->lineEditGAExecutable->setEnabled(m_ga == nullptr && m_runMergeXML == 0 && ui->checkBoxMergeXMLActivate->isChecked());
+    ui->lineEditGAExecutable->setEnabled(m_ga == nullptr && m_runMergeXML == 0);
     ui->lineEditCurrentLoopCount->setEnabled(ui->checkBoxMergeXMLActivate->isChecked());
     ui->lineEditCurrentLoopValue->setEnabled(ui->checkBoxMergeXMLActivate->isChecked());
     ui->spinBoxLogLevel->setEnabled(true);
@@ -830,6 +830,11 @@ void AsynchronousGAQtWidget::setResultNumber(int number)
 void AsynchronousGAQtWidget::setBestScore(double value)
 {
     ui->lineEditBestScore->setText(QString::number(value, 'g', 6));
+}
+
+void AsynchronousGAQtWidget::setEvolveID(uint64_t value)
+{
+    ui->lineEditRunID->setText(QString::number(value));
 }
 
 void AsynchronousGAQtWidget::readSettings()
@@ -1533,7 +1538,8 @@ void AsynchronousGAQtWidget::setCustomTitle()
 void AsynchronousGAQtWidget::readStandardError()
 {
     QString output = m_ga->readAllStandardError();
-    QStringList lines = output.split(QRegularExpression("\\n|\\r"), Qt::SkipEmptyParts);
+    static QRegularExpression re("\\n|\\r");
+    QStringList lines = output.split(re, Qt::SkipEmptyParts);
     for (auto &&it : lines)
     {
         QStringList tokens = it.split('=');
@@ -1542,13 +1548,15 @@ void AsynchronousGAQtWidget::readStandardError()
         if (code == "Progress") { setProgressValue(tokens[1].toInt()); continue; }
         if (code == "Return Count") { setResultNumber(tokens[1].toInt()); continue; }
         if (code == "Best Score") { setBestScore(tokens[1].toDouble()); continue; }
+        if (code == "Evolve Identifier") { setEvolveID(tokens[1].toULongLong()); continue; }
     }
 }
 
 void AsynchronousGAQtWidget::readStandardOutput()
 {
     QString output = m_ga->readAllStandardOutput();
-    QStringList lines = output.split(QRegularExpression("\\n|\\r"), Qt::SkipEmptyParts);
+    static QRegularExpression re("\\n|\\r");
+    QStringList lines = output.split(re, Qt::SkipEmptyParts);
     appendProgress(lines.join('\n'));
 }
 

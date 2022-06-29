@@ -257,7 +257,7 @@ int GAMain::Evolve()
     Mating mating(&m_random);
     bool shouldStop = false;
 
-    ReportProgress(ToString("evolveIdentifier = %" PRIu64, m_evolveIdentifier), 1);
+    ReportInfo(ToString("Evolve Identifier = %" PRIu64, m_evolveIdentifier));
 
     // start the TCP server
     ServerASIO *server = new ServerASIO();

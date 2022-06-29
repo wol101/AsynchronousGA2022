@@ -72,6 +72,7 @@ public slots:
     void setProgressValue(int value);
     void setResultNumber(int number);
     void setBestScore(double value);
+    void setEvolveID(uint64_t value);
     void tryToStopGA();
 
 protected:

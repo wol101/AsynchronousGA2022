@@ -217,10 +217,83 @@
        <string>GA Controls</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="1" column="5">
-        <widget class="QLabel" name="label">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>Log Level</string>
+          <string>Fitness</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEditBestScore">
+         <property name="maximumSize">
+          <size>
+           <width>69</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Run ID</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLineEdit" name="lineEditRunID">
+         <property name="maximumSize">
+          <size>
+           <width>69</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="5">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>Port</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6">
+        <widget class="QSpinBox" name="spinBoxPort">
+         <property name="maximum">
+          <number>65553</number>
+         </property>
+         <property name="value">
+          <number>8086</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Result #</string>
          </property>
         </widget>
        </item>
@@ -249,22 +322,10 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="6">
-        <widget class="QSpinBox" name="spinBoxLogLevel">
-         <property name="toolTip">
-          <string>0 off, 1 minimal, 2 detailed</string>
-         </property>
-         <property name="prefix">
-          <string/>
-         </property>
-         <property name="minimum">
-          <number>0</number>
-         </property>
-         <property name="maximum">
-          <number>3</number>
-         </property>
-         <property name="value">
-          <number>1</number>
+       <item row="1" column="2">
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>Gen/sec</string>
          </property>
         </widget>
        </item>
@@ -281,40 +342,6 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEditBestScore">
-         <property name="maximumSize">
-          <size>
-           <width>69</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLabel" name="label_10">
-         <property name="text">
-          <string>Gen/sec</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Fitness</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Result #</string>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="4">
         <spacer name="horizontalSpacer">
          <property name="orientation">
@@ -328,36 +355,29 @@
          </property>
         </spacer>
        </item>
-       <item row="0" column="4">
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="0" column="6">
-        <widget class="QSpinBox" name="spinBoxPort">
-         <property name="maximum">
-          <number>65553</number>
-         </property>
-         <property name="value">
-          <number>8086</number>
+       <item row="1" column="5">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Log Level</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="5">
-        <widget class="QLabel" name="label_11">
-         <property name="text">
-          <string>Port</string>
+       <item row="1" column="6">
+        <widget class="QSpinBox" name="spinBoxLogLevel">
+         <property name="toolTip">
+          <string>0 off, 1 minimal, 2 detailed</string>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         <property name="prefix">
+          <string/>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>3</number>
+         </property>
+         <property name="value">
+          <number>1</number>
          </property>
         </widget>
        </item>
