@@ -245,17 +245,22 @@ int Population::WritePopulation(const char *filename, size_t nBest)
 
     try
     {
-        std::ofstream outFile(filename);
+        std::ofstream outFile;
+        outFile.exceptions (std::ios::failbit|std::ios::badbit);
+        outFile.open(filename);
         outFile << nBest << "\n";
-
         size_t count = 0;
         for (auto iter = m_Population.rbegin(); iter != m_Population.rend(); ++iter)
         {
             outFile << iter->second;
             count++;
-
             if (count >= nBest) break;
         }
+        outFile.close();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << "\n";
     }
     catch (...)
     {
@@ -265,36 +270,49 @@ int Population::WritePopulation(const char *filename, size_t nBest)
 }
 
 // read a population
-// this can be quite slow because it resorts everything which may not be necessary
+// this can be quite slow because it re-sorts everything which may not be necessary
 // and it may not preserve existing fitnesses if they are not all unique
 int Population::ReadPopulation(const char *filename)
 {
-    std::ifstream inFile(filename);
-    if (inFile.good() == false) return __LINE__;
-
-    m_Population.clear();
-    m_PopulationIndex.clear();
-    m_ImmortalListIndex.clear();
-    m_AgeList.clear();
-
-    size_t populationSize;
-    inFile >> populationSize;
-    bool warningEmitted = false;
-    for (size_t i = 0; i < populationSize; i++)
+    std::ifstream inFile;
+    inFile.exceptions (std::ios::failbit|std::ios::badbit|std::ios::eofbit);
+    try
     {
-        Genome genome;
-        inFile >> genome;
-        // std::cerr << "Fitness = " << genome.GetFitness() << "\n";
-        if (i > 0 && m_Population.find(genome.GetFitness()) != m_Population.end())
+        inFile.open(filename);
+
+        m_Population.clear();
+        m_PopulationIndex.clear();
+        m_ImmortalListIndex.clear();
+        m_AgeList.clear();
+
+        size_t populationSize;
+        inFile >> populationSize;
+        bool warningEmitted = false;
+        for (size_t i = 0; i < populationSize; i++)
         {
-            genome.SetFitness(std::nextafter(m_PopulationIndex.back(), std::numeric_limits<double>::max())); // this line forces all the genomes to be inserted since they might not have valid fitnesses
-            if (!warningEmitted)
+            Genome genome;
+            inFile >> genome;
+            // std::cerr << "Fitness = " << genome.GetFitness() << "\n";
+            if (i > 0 && m_Population.find(genome.GetFitness()) != m_Population.end())
             {
-                std::cerr << "Warning: population contains duplicate fitness values. Setting to fake values. index first detected = " << i << "\n";
-                warningEmitted = true;
+                genome.SetFitness(std::nextafter(m_PopulationIndex.back(), std::numeric_limits<double>::max())); // this line forces all the genomes to be inserted since they might not have valid fitnesses
+                if (!warningEmitted)
+                {
+                    std::cerr << "Warning: population contains duplicate fitness values. Setting to fake values. index first detected = " << i << "\n";
+                    warningEmitted = true;
+                }
             }
+            InsertGenome(std::move(genome), populationSize);
         }
-        InsertGenome(std::move(genome), populationSize);
+        inFile.close();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << "\n";
+    }
+    catch (...)
+    {
+        return __LINE__;
     }
     return 0;
 }

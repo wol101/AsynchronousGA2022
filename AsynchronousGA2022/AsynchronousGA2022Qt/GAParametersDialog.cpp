@@ -22,7 +22,7 @@ GAParametersDialog::GAParametersDialog(QWidget *parent) :
     for (auto &&it : listQComboBox) { connect(it, &QComboBox::currentIndexChanged, this, &GAParametersDialog::activateButtons); }
     activateButtons();
 
-    QSettings settings("ASL", "AsynchronousGAQt2019");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "AnimalSimulationLaboratory", "AsynchronousGAQt2019");
     restoreGeometry(settings.value("GAParametersDialogGeometry").toByteArray());
 }
 
@@ -33,7 +33,7 @@ GAParametersDialog::~GAParametersDialog()
 
 void GAParametersDialog::closeEvent(QCloseEvent *event)
 {
-    QSettings settings("ASL", "AsynchronousGAQt2019");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "AnimalSimulationLaboratory", "AsynchronousGAQt2019");
     settings.setValue("GAParametersDialogGeometry", saveGeometry());
     settings.sync();
     QDialog::closeEvent(event);

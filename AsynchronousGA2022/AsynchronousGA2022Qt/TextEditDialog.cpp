@@ -23,7 +23,7 @@ TextEditDialog::TextEditDialog(QWidget *parent) :
     m_basicXMLSyntaxHighlighter = 0;
     m_editorFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
-    QSettings settings("ASL", "AsynchronousGAQt2019");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "AnimalSimulationLaboratory", "AsynchronousGAQt2019");
     m_editorFont = settings.value("editorFont", QFont()).value<QFont>();
     restoreGeometry(settings.value("textEditDialogGeometry").toByteArray());
 
@@ -37,7 +37,7 @@ TextEditDialog::~TextEditDialog()
 
 void TextEditDialog::closeEvent(QCloseEvent *event)
 {
-    QSettings settings("ASL", "AsynchronousGAQt2019");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "AnimalSimulationLaboratory", "AsynchronousGAQt2019");
     settings.setValue("textEditDialogGeometry", saveGeometry());
     settings.sync();
     QDialog::closeEvent(event);

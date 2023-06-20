@@ -23,6 +23,7 @@ namespace rapidxml
 
 const int print_no_indenting = 0x1;   //!< Printer flag instructing the printer to suppress indenting of XML. See print() function.
 const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the printer to add /n after each attribute. See print() function.
+const int print_indent_with_spaces = 0x4;   //!< Printer flag instructing the printer to use 4 spaces rather than a tab for indenting. See print() function.
 
     ///////////////////////////////////////////////////////////////////////
     // Internal
@@ -88,6 +89,15 @@ const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the print
         {
             for (int i = 0; i < n; ++i)
                 *out++ = ch;
+            return out;
+        }
+
+        template<class OutIt, class Ch>
+        inline OutIt fill_chars(OutIt out, int n, Ch ch, int r)
+        {
+            for (int i = 0; i < n; ++i)
+                for (int j = 0; j < r; j++)
+                    *out++ = ch;
             return out;
         }
 
@@ -200,10 +210,13 @@ const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the print
                     *out = Ch('\n'), ++out;
                 if (attribute->name() && attribute->value())
                 {
-                    if (flags & print_lf_after_attrib)
-                        out = fill_chars(out, indent + 1, Ch('\t'));
-                    else
-                        *out = Ch(' '), ++out;
+                    if (flags & print_lf_after_attrib) {
+                        if (flags & print_indent_with_spaces)
+                            out = fill_chars(out, indent + 1, Ch(' '), 4);
+                        else
+                            out = fill_chars(out, indent + 1, Ch('\t')); }
+                    else {
+                        *out = Ch(' '), ++out; }
                     // Print attribute name
                     out = copy_chars(attribute->name(), attribute->name() + attribute->name_size(), out);
                     *out = Ch('='), ++out;
@@ -232,8 +245,11 @@ const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the print
         inline OutIt print_data_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
         {
             assert(node->type() == node_data);
-            if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
+            if (!(flags & print_no_indenting)) {
+                if (flags & print_indent_with_spaces)
+                    out = fill_chars(out, indent, Ch(' '), 4);
+                else
+                    out = fill_chars(out, indent, Ch('\t')); }
             out = copy_and_expand_chars(node->value(), node->value() + node->value_size(), Ch(0), out);
             return out;
         }
@@ -243,8 +259,11 @@ const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the print
         inline OutIt print_cdata_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
         {
             assert(node->type() == node_cdata);
-            if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
+            if (!(flags & print_no_indenting)) {
+                if (flags & print_indent_with_spaces)
+                    out = fill_chars(out, indent, Ch(' '), 4);
+                else
+                    out = fill_chars(out, indent, Ch('\t')); }
             *out = Ch('<'); ++out;
             *out = Ch('!'); ++out;
             *out = Ch('['); ++out;
@@ -268,8 +287,11 @@ const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the print
             assert(node->type() == node_element);
 
             // Print element name and attributes, if any
-            if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
+            if (!(flags & print_no_indenting)) {
+                if (flags & print_indent_with_spaces)
+                    out = fill_chars(out, indent, Ch(' '), 4);
+                else
+                    out = fill_chars(out, indent, Ch('\t')); }
             *out = Ch('<'), ++out;
             out = copy_chars(node->name(), node->name() + node->name_size(), out);
             out = print_attributes(out, node, flags, indent);
@@ -277,8 +299,11 @@ const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the print
             // If node is childless
             if (node->value_size() == 0 && !node->first_node())
             {
-                if (!(flags & print_no_indenting))
-                    out = fill_chars(out, indent, Ch('\t'));
+                if (!(flags & print_no_indenting)) {
+                    if (flags & print_indent_with_spaces)
+                        out = fill_chars(out, indent, Ch(' '), 4);
+                    else
+                        out = fill_chars(out, indent, Ch('\t')); }
                 // Print childless node tag ending
                 *out = Ch('/'), ++out;
                 *out = Ch('>'), ++out;
@@ -306,12 +331,18 @@ const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the print
                     if (!(flags & print_no_indenting))
                         *out = Ch('\n'), ++out;
                     out = print_children(out, node, flags, indent + 1);
-                    if (!(flags & print_no_indenting))
-                        out = fill_chars(out, indent, Ch('\t'));
+                    if (!(flags & print_no_indenting)) {
+                        if (flags & print_indent_with_spaces)
+                            out = fill_chars(out, indent, Ch(' '), 4);
+                        else
+                            out = fill_chars(out, indent, Ch('\t')); }
                 }
 
-                if (!(flags & print_no_indenting))
-                    out = fill_chars(out, indent, Ch('\t'));
+                if (!(flags & print_no_indenting)) {
+                    if (flags & print_indent_with_spaces)
+                        out = fill_chars(out, indent, Ch(' '), 4);
+                    else
+                        out = fill_chars(out, indent, Ch('\t')); }
                 // Print node end
                 *out = Ch('<'), ++out;
                 *out = Ch('/'), ++out;
@@ -326,8 +357,11 @@ const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the print
         inline OutIt print_declaration_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
         {
             // Print declaration start
-            if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
+            if (!(flags & print_no_indenting)) {
+                if (flags & print_indent_with_spaces)
+                    out = fill_chars(out, indent, Ch(' '), 4);
+                else
+                    out = fill_chars(out, indent, Ch('\t')); }
             *out = Ch('<'), ++out;
             *out = Ch('?'), ++out;
             *out = Ch('x'), ++out;
@@ -349,8 +383,11 @@ const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the print
         inline OutIt print_comment_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
         {
             assert(node->type() == node_comment);
-            if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
+            if (!(flags & print_no_indenting)) {
+                if (flags & print_indent_with_spaces)
+                    out = fill_chars(out, indent, Ch(' '), 4);
+                else
+                    out = fill_chars(out, indent, Ch('\t')); }
             *out = Ch('<'), ++out;
             *out = Ch('!'), ++out;
             *out = Ch('-'), ++out;
@@ -367,8 +404,11 @@ const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the print
         inline OutIt print_doctype_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
         {
             assert(node->type() == node_doctype);
-            if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
+            if (!(flags & print_no_indenting)) {
+                if (flags & print_indent_with_spaces)
+                    out = fill_chars(out, indent, Ch(' '), 4);
+                else
+                    out = fill_chars(out, indent, Ch('\t')); }
             *out = Ch('<'), ++out;
             *out = Ch('!'), ++out;
             *out = Ch('D'), ++out;
@@ -389,8 +429,11 @@ const int print_lf_after_attrib = 0x2;   //!< Printer flag instructing the print
         inline OutIt print_pi_node(OutIt out, const xml_node<Ch> *node, int flags, int indent)
         {
             assert(node->type() == node_pi);
-            if (!(flags & print_no_indenting))
-                out = fill_chars(out, indent, Ch('\t'));
+            if (!(flags & print_no_indenting)) {
+                if (flags & print_indent_with_spaces)
+                    out = fill_chars(out, indent, Ch(' '), 4);
+                else
+                    out = fill_chars(out, indent, Ch('\t')); }
             *out = Ch('<'), ++out;
             *out = Ch('?'), ++out;
             out = copy_chars(node->name(), node->name() + node->name_size(), out);

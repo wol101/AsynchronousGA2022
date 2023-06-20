@@ -113,7 +113,8 @@ private:
     void closeEvent(QCloseEvent *event) override;
     void setCustomTitle();
     void activateButtons();
-
+    QString convertToRelativePath(const QString &filename);
+    QString convertToAbsolutePath(const QString &filename);
 
     Ui::AsynchronousGAQtWidget *ui = nullptr;
     QProcess *m_ga = nullptr;

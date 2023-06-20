@@ -30,6 +30,8 @@ set(PROJECT_SOURCES
         MergeUtil.h
         MergeXML.cpp
         MergeXML.h
+        ParseXML.cpp
+        ParseXML.h
         Resources.qrc
         TextEditDialog.cpp
         TextEditDialog.h
@@ -46,6 +48,7 @@ set(PROJECT_SOURCES
         ../pystring/pystring.cpp
         ../pystring/pystring.h
         ../exprtk/exprtk.hpp
+        ../rapidxml-1.13/rapidxml.hpp
         Images/myapp.rc
 )
 
@@ -103,3 +106,4 @@ endif ()
 find_package(Qt6 REQUIRED COMPONENTS Xml)
 target_link_libraries(AsynchronousGA2022Qt PRIVATE Qt6::Xml)
 
+#add_definitions(-DRAPIDXML_NO_EXCEPTIONS)

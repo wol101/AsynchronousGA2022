@@ -41,6 +41,7 @@ AsynchronousGAQtWidget::AsynchronousGAQtWidget(QWidget *parent) :
     // adjust the appearance of the main window
     ui->mainToolBar->hide();
 
+    // these widgets are used to ensure the spacing weorks properly and need to be hidden  but still take up space
     QSizePolicy sizePolicy = ui->pushButtonDummy->sizePolicy();
     sizePolicy.setRetainSizeWhenHidden(true);
     ui->pushButtonDummy->setSizePolicy(sizePolicy);
@@ -49,6 +50,27 @@ AsynchronousGAQtWidget::AsynchronousGAQtWidget(QWidget *parent) :
     sizePolicy.setRetainSizeWhenHidden(true);
     ui->lineEditDummy->setSizePolicy(sizePolicy);
     ui->lineEditDummy->hide();
+
+#ifdef ASYNCHRONOUSGAQTWIDGET_RESIZE_CONTROLS
+    // the line edit for the Run ID can be too small so make sure it fits the biggest number
+    QString testText = QString::number(std::numeric_limits<uint64_t>::max());
+    QFontMetrics fontMetrics(ui->lineEditRunID->font());
+    // Option (1)
+    // QRect rect = fontMetrics.boundingRect(testText); // this will fail if we are using a font with variable width digits (unusual)
+    // ui->lineEditRunID->setMinimumWidth(rect.width());
+    // Option (2)
+    // int maxWidth = 0;
+    // for (char c = '0'; c <= '9'; c++) maxWidth = std::max(maxWidth, fontMetrics.horizontalAdvance(c)); // this might fail if the font is highly slanted as it ignores possible negative left and right bearings
+    // ui->lineEditRunID->setMinimumWidth(maxWidth * testText.size());
+    // Option (3)
+    int maxWidth = -std::numeric_limits<int>::max();
+    char widestCharacter = '0';
+    for (char c = '0'; c <= '9'; c++) { if (fontMetrics.boundingRect(c).width() > maxWidth) { maxWidth = fontMetrics.boundingRect(c).width(); widestCharacter = c; } }
+    for (int i = 0; i < testText.size(); i++) testText[i] = widestCharacter;
+    ui->lineEditRunID->setMinimumWidth(fontMetrics.boundingRect(testText).width()); // this should always work correctly
+
+    ui->lineEditGenerationsPerSecond->setMinimumWidth(ui->lineEditRunID->minimumWidth()); // this widget just needs to match because it is underneath in the layout
+#endif
 
     // set up the menus
     createActions();
@@ -839,9 +861,9 @@ void AsynchronousGAQtWidget::setEvolveID(uint64_t value)
 
 void AsynchronousGAQtWidget::readSettings()
 {
-    QSettings settings("ASL", "AsynchronousGAQt2019");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "AnimalSimulationLaboratory", "AsynchronousGAQt2019");
     m_asynchronousGAFileName = settings.value("asynchronousGAFileFileName", "").toString();
-    m_editorFont = settings.value("editorFont", QFont()).value<QFont>();
+    m_editorFont.fromString(settings.value("editorFont", QFont(QFontDatabase::systemFont(QFontDatabase::FixedFont)).toString()).toString());
     restoreGeometry(settings.value("geometry").toByteArray());
     restoreState(settings.value("windowState").toByteArray());
     setCustomTitle();
@@ -849,9 +871,9 @@ void AsynchronousGAQtWidget::readSettings()
 
 void AsynchronousGAQtWidget::writeSettings()
 {
-    QSettings settings("ASL", "AsynchronousGAQt2019");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "AnimalSimulationLaboratory", "AsynchronousGAQt2019");
     settings.setValue("asynchronousGAFileFileName", m_asynchronousGAFileName);
-    settings.setValue("editorFont", m_editorFont);
+    settings.setValue("editorFont", m_editorFont.toString());
     settings.setValue("geometry", saveGeometry());
     settings.setValue("windowState", saveState());
     settings.sync();
@@ -1122,7 +1144,7 @@ void AsynchronousGAQtWidget::open(const QString &fileName)
         return;
     }
 
-    QSettings settings("ASL", "AsynchronousGAQt2019");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "AnimalSimulationLaboratory", "AsynchronousGAQt2019");
     settings.setValue("asynchronousGAFileFileName", m_asynchronousGAFileName);
     settings.sync();
 
@@ -1137,17 +1159,17 @@ void AsynchronousGAQtWidget::open(const QString &fileName)
         {
             if (e.tagName() == "SETTINGS")
             {
-                ui->lineEditOutputFolder->setText(e.attribute("outputFolder"));
-                ui->lineEditParameterFile->setText(e.attribute("parameterFile"));
-                ui->lineEditXMLMasterFile->setText(e.attribute("xmlMasterFile"));
-                ui->lineEditStartingPopulationFile->setText(e.attribute("startingPopulationFile"));
-                ui->lineEditModelConfigurationFile->setText(e.attribute("modelConfigurationFile"));
-                ui->lineEditModelPopulationFile->setText(e.attribute("modelPopulationFile"));
-                ui->lineEditDriverFile->setText(e.attribute("driverFile"));
-                ui->lineEditWorkingFolder->setText(e.attribute("workingFolder"));
-                ui->lineEditMergeXMLFile->setText(e.attribute("mergeXMLFile"));
-                ui->lineEditGaitSymExecutable->setText(e.attribute("gaitSymExecutable"));
-                ui->lineEditGAExecutable->setText(e.attribute("gaExecutable"));
+                ui->lineEditOutputFolder->setText(convertToAbsolutePath(e.attribute("outputFolder")));
+                ui->lineEditParameterFile->setText(convertToAbsolutePath(e.attribute("parameterFile")));
+                ui->lineEditXMLMasterFile->setText(convertToAbsolutePath(e.attribute("xmlMasterFile")));
+                ui->lineEditStartingPopulationFile->setText(convertToAbsolutePath(e.attribute("startingPopulationFile")));
+                ui->lineEditModelConfigurationFile->setText(convertToAbsolutePath(e.attribute("modelConfigurationFile")));
+                ui->lineEditModelPopulationFile->setText(convertToAbsolutePath(e.attribute("modelPopulationFile")));
+                ui->lineEditDriverFile->setText(convertToAbsolutePath(e.attribute("driverFile")));
+                ui->lineEditWorkingFolder->setText(convertToAbsolutePath(e.attribute("workingFolder")));
+                ui->lineEditMergeXMLFile->setText(convertToAbsolutePath(e.attribute("mergeXMLFile")));
+                ui->lineEditGaitSymExecutable->setText(convertToAbsolutePath(e.attribute("gaitSymExecutable")));
+                ui->lineEditGAExecutable->setText(convertToAbsolutePath(e.attribute("gaExecutable")));
                 ui->spinBoxLogLevel->setValue(e.attribute("logLevel").toInt());
                 ui->spinBoxPort->setValue(e.attribute("portNumber").toInt());
                 ui->doubleSpinBoxStartValue->setValue(e.attribute("startValue").toDouble());
@@ -1189,17 +1211,17 @@ void AsynchronousGAQtWidget::save()
     QDomElement dataItemsElement = doc.createElement("SETTINGS");
     root.appendChild(dataItemsElement);
 
-    dataItemsElement.setAttribute("outputFolder", ui->lineEditOutputFolder->text());
-    dataItemsElement.setAttribute("parameterFile", ui->lineEditParameterFile->text());
-    dataItemsElement.setAttribute("xmlMasterFile", ui->lineEditXMLMasterFile->text());
-    dataItemsElement.setAttribute("startingPopulationFile", ui->lineEditStartingPopulationFile->text());
-    dataItemsElement.setAttribute("modelConfigurationFile", ui->lineEditModelConfigurationFile->text());
-    dataItemsElement.setAttribute("modelPopulationFile", ui->lineEditModelPopulationFile->text());
-    dataItemsElement.setAttribute("driverFile", ui->lineEditDriverFile->text());
-    dataItemsElement.setAttribute("workingFolder", ui->lineEditWorkingFolder->text());
-    dataItemsElement.setAttribute("mergeXMLFile", ui->lineEditMergeXMLFile->text());
-    dataItemsElement.setAttribute("gaitSymExecutable", ui->lineEditGaitSymExecutable->text());
-    dataItemsElement.setAttribute("gaExecutable", ui->lineEditGAExecutable->text());
+    dataItemsElement.setAttribute("outputFolder", convertToRelativePath(ui->lineEditOutputFolder->text()));
+    dataItemsElement.setAttribute("parameterFile", convertToRelativePath(ui->lineEditParameterFile->text()));
+    dataItemsElement.setAttribute("xmlMasterFile", convertToRelativePath(ui->lineEditXMLMasterFile->text()));
+    dataItemsElement.setAttribute("startingPopulationFile", convertToRelativePath(ui->lineEditStartingPopulationFile->text()));
+    dataItemsElement.setAttribute("modelConfigurationFile", convertToRelativePath(ui->lineEditModelConfigurationFile->text()));
+    dataItemsElement.setAttribute("modelPopulationFile", convertToRelativePath(ui->lineEditModelPopulationFile->text()));
+    dataItemsElement.setAttribute("driverFile", convertToRelativePath(ui->lineEditDriverFile->text()));
+    dataItemsElement.setAttribute("workingFolder", convertToRelativePath(ui->lineEditWorkingFolder->text()));
+    dataItemsElement.setAttribute("mergeXMLFile", convertToRelativePath(ui->lineEditMergeXMLFile->text()));
+    dataItemsElement.setAttribute("gaitSymExecutable", convertToRelativePath(ui->lineEditGaitSymExecutable->text()));
+    dataItemsElement.setAttribute("gaExecutable", convertToRelativePath(ui->lineEditGAExecutable->text()));
     dataItemsElement.setAttribute("logLevel", ui->spinBoxLogLevel->text());
     dataItemsElement.setAttribute("portNumber", ui->spinBoxPort->text());
     dataItemsElement.setAttribute("startValue", ui->doubleSpinBoxStartValue->text());
@@ -1234,6 +1256,22 @@ void AsynchronousGAQtWidget::saveAs()
         m_asynchronousGAFileName = fileName;
         save();
     }
+}
+
+QString AsynchronousGAQtWidget::convertToRelativePath(const QString &filename)
+{
+    QFileInfo fileInfo(m_asynchronousGAFileName);
+    QDir dir = fileInfo.absoluteDir();
+    QString relativePath = QDir::cleanPath(dir.relativeFilePath(filename));
+    return relativePath;
+}
+
+QString AsynchronousGAQtWidget::convertToAbsolutePath(const QString &filename)
+{
+    QFileInfo fileInfo(m_asynchronousGAFileName);
+    QDir dir = fileInfo.absoluteDir();
+    QString relativePath = QDir::cleanPath(dir.absoluteFilePath(filename));
+    return relativePath;
 }
 
 void AsynchronousGAQtWidget::editSettings()
@@ -1543,12 +1581,15 @@ void AsynchronousGAQtWidget::readStandardError()
     for (auto &&it : lines)
     {
         QStringList tokens = it.split('=');
-        if (tokens.size() != 2) continue;
-        QString code = tokens[0].trimmed();
-        if (code == "Progress") { setProgressValue(tokens[1].toInt()); continue; }
-        if (code == "Return Count") { setResultNumber(tokens[1].toInt()); continue; }
-        if (code == "Best Score") { setBestScore(tokens[1].toDouble()); continue; }
-        if (code == "Evolve Identifier") { setEvolveID(tokens[1].toULongLong()); continue; }
+        if (tokens.size() == 2)
+        {
+            QString code = tokens[0].trimmed();
+            if (code == "Progress") { setProgressValue(tokens[1].toInt()); continue; }
+            if (code == "Return Count") { setResultNumber(tokens[1].toInt()); continue; }
+            if (code == "Best Score") { setBestScore(tokens[1].toDouble()); continue; }
+            if (code == "Evolve Identifier") { setEvolveID(tokens[1].toULongLong()); continue; }
+        }
+        appendProgress(it + '\n');
     }
 }
 

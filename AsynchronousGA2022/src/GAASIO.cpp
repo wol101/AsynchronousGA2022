@@ -40,6 +40,9 @@
 #include <cinttypes>
 #include <filesystem>
 #include <regex>
+#if ! ( defined(WIN32) || defined(_WIN32))
+#include <sys/resource.h>
+#endif
 
 using namespace std::string_literals;
 
@@ -82,7 +85,7 @@ int main(int argc, const char **argv)
     argparse.Get("--parameterFile"s, &parameterFile);
     argparse.Get("--outputDirectory"s, &outputDirectory);
     argparse.Get("--startingPopulation"s, &startingPopulation);
-
+    
     GAMain ga;
     ga.SetLogLevel(logLevel);
     ga.LoadBaseXMLFile(baseXMLFile);
@@ -92,11 +95,42 @@ int main(int argc, const char **argv)
 
 GAMain::GAMain()
 {
+    m_outputLogFile.exceptions(std::ios::failbit|std::ios::badbit);
 }
 
 int GAMain::Process(const std::string &parameterFile, const std::string &outputDirectory, const std::string &startingPopulation)
 
 {
+    // check and if necessary set some file open limits since this program can open a lot of files
+#if defined(WIN32) || defined(_WIN32)
+    ReportProgress("Original number of open files limit = "s + std::to_string(_getmaxstdio()), 1);
+    const int windowsMaxNumberOfOpentFiles = 8096; // this is the current windows limit as defined in the _setmaxstdio documentation
+    if (_getmaxstdio() < windowsMaxNumberOfOpentFiles)
+    {
+        int status = _setmaxstdio(windowsMaxNumberOfOpentFiles);
+        if (status == -1) ReportProgress("Error calling _setmaxstdio(windowsMaxNumberOfOpentFiles)"s, 0);
+        else ReportProgress("New number of open files limit = "s + std::to_string(_getmaxstdio()), 1);
+    }
+#else
+    struct rlimit rlim;
+    int status = getrlimit(RLIMIT_NOFILE, &rlim);
+    if (status == -1)
+    {
+        ReportProgress("Error calling getrlimit(RLIMIT_NOFILE, &rlim)"s, 0);
+    }
+    else
+    {
+        ReportProgress("Original number of open files limits: soft = "s + std::to_string(rlim.rlim_cur) + " hard = "s + std::to_string(rlim.rlim_max), 1);
+        if (rlim.rlim_cur < rlim.rlim_max)
+        {
+            rlim.rlim_cur = rlim.rlim_max;
+            status = setrlimit(RLIMIT_NOFILE, &rlim);
+            if (status == -1) ReportProgress("Error calling setrlimit(RLIMIT_NOFILE, &rlim)"s, 0);
+            else ReportProgress("New number of open files limits: soft = "s + std::to_string(rlim.rlim_cur) + " hard = "s + std::to_string(rlim.rlim_max), 1);
+        }
+    }
+#endif
+
     time_t theTime = time(nullptr);
     struct tm *theLocalTime = localtime(&theTime);
     std::string logFileName;
@@ -156,6 +190,11 @@ int GAMain::Process(const std::string &parameterFile, const std::string &outputD
         try
         {
             std::filesystem::create_directories(m_outputFolderName);
+        }
+        catch (std::exception& e)
+        {
+            ReportProgress("Error creating directory "s + m_outputFolderName, 0);
+            ReportProgress(e.what(), 0);
         }
         catch (...)
         {
@@ -364,13 +403,13 @@ int GAMain::Evolve()
                 }
             }
             // got a genome to send
-            std::vector<char> dataMessage(sizeof(DataMessage) + m_startPopulation.GetFirstGenome()->GetGenomeLength() * sizeof(double));
+            std::vector<char> dataMessage(sizeof(DataMessage) + offspring.GetGenomeLength() * sizeof(double));
             DataMessage *dataMessagePtr = reinterpret_cast<DataMessage *>(dataMessage.data());
-            strncpy(dataMessagePtr->text, "genome", 16);
+            strncpy(dataMessagePtr->text, "genome", sizeof(dataMessagePtr->text));
 //            server.GetMyAddress(&dataMessagePtr->senderIP, &dataMessagePtr->senderPort);
             dataMessagePtr->evolveIdentifier = m_evolveIdentifier;
             dataMessagePtr->runID = submitCount;
-            dataMessagePtr->genomeLength = uint32_t(m_startPopulation.GetFirstGenome()->GetGenomeLength());
+            dataMessagePtr->genomeLength = uint32_t(offspring.GetGenomeLength());
             dataMessagePtr->xmlLength = uint32_t(m_baseXMLFile.GetSize());
             std::copy(std::begin(m_md5), std::end(m_md5), std::begin(dataMessagePtr->md5));
             std::copy_n(offspring.GetGenes()->data(), offspring.GetGenomeLength(), dataMessagePtr->payload.genome);
@@ -413,6 +452,7 @@ int GAMain::Evolve()
                 continue;
             }
             iter->second->genome.SetFitness(result);
+            // std::cerr << iter->second->genome;
             m_evolvePopulation.InsertGenome(std::move(iter->second->genome), m_preferences.populationSize);
             runningList.erase(iter);
 
@@ -433,10 +473,21 @@ int GAMain::Evolve()
                     try
                     {
                         ReportProgress("Writing "s + filename, 1);
-                        std::ofstream bestFile(filename);
+                        std::ofstream bestFile;
+                        bestFile.exceptions (std::ios::failbit|std::ios::badbit);
+                        bestFile.open(filename);
                         bestFile << *m_evolvePopulation.GetLastGenome();
+                        bestFile.close();
                     }
-                    catch (...) { ReportProgress("Error writing "s + filename, 0); }
+                    catch (std::exception& e)
+                    {
+                        ReportProgress("Error writing "s + filename, 0);
+                        ReportProgress(e.what(), 0);
+                    }
+                    catch (...)
+                    {
+                        ReportProgress("Error writing "s + filename, 0);
+                    }
                     ReportInfo(ToString("Best Score = %g", maxFitness));
                 }
             }
@@ -479,7 +530,15 @@ int GAMain::Evolve()
                     std::ofstream bestFile(filename);
                     bestFile << *m_evolvePopulation.GetLastGenome();
                 }
-                catch(...) { ReportProgress("Error writing "s + filename, 0); }
+                catch (std::exception& e)
+                {
+                    ReportProgress("Error writing "s + filename, 0);
+                    ReportProgress(e.what(), 0);
+                }
+                catch(...)
+                {
+                    ReportProgress("Error writing "s + filename, 0);
+                }
             }
         }
 
@@ -684,6 +743,11 @@ int GAMain::OnlyKeepLastMatching(const std::string &regexPattern)
             if (std::regex_match(basename, regex)) { directoryContents.push_back(entry.path().u8string()); }
         }
     }
+    catch (std::exception& e)
+    {
+        ReportProgress("Error reading output directory "s + m_outputFolderName, 0);
+        ReportProgress(e.what(), 0);
+    }
     catch (...)
     {
         ReportProgress("Error reading output directory "s + m_outputFolderName, 0);
@@ -701,6 +765,11 @@ int GAMain::OnlyKeepLastMatching(const std::string &regexPattern)
         {
             ReportProgress("Removing "s + directoryContents[i], 1);
             std::filesystem::remove(directoryContents[i]);
+        }
+        catch (std::exception& e)
+        {
+            ReportProgress("Error deleting "s + directoryContents[i], 0);
+            ReportProgress(e.what(), 0);
         }
         catch (...)
         {

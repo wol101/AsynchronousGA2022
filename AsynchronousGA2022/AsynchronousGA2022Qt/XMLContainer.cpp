@@ -95,10 +95,18 @@ int XMLContainer::WriteXML(const char *filename)
     std::string buf = outputStream.str();
     RecoverExpressions(&buf[0]);
 
-    std::ofstream outputFile(filename, std::ios::out | std::ios::binary);
+    try
+    {
+    std::ofstream outputFile;
+    outputFile.exceptions(std::ios::failbit|std::ios::badbit);
+    outputFile.open(filename, std::ios::out | std::ios::binary);
     outputFile.write(buf.c_str(), std::streamsize(buf.size()));
     outputFile.close();
-
+    }
+    catch (...)
+    {
+        return __LINE__;
+    }
     return 0;
 }
 
