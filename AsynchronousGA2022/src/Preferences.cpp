@@ -64,6 +64,7 @@ int Preferences::ReadPreferences(const std::string &filename)
 
         if (params.RetrieveParameter("circularMutation", &circularMutation)) throw __LINE__;
         if (params.RetrieveParameter("bounceMutation", &bounceMutation)) throw __LINE__;
+        if (params.RetrieveParameter("minimizeScore", &minimizeScore)) throw __LINE__;
 
         if (params.RetrieveParameter("resizeControl", &paramsBuffer)) throw __LINE__;
         if (paramsBuffer == "RandomiseResize"s) resizeControl = RandomiseResize;

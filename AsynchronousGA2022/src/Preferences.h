@@ -49,6 +49,7 @@ public:
     double gamma = 0.5;
     bool circularMutation = false;
     bool bounceMutation = true;
+    bool minimizeScore = false;
     ResizeControl resizeControl = MutateResize;
 };
 
