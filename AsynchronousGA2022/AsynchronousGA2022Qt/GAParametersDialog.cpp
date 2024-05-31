@@ -52,6 +52,7 @@ QString GAParametersDialog::editorText() const
     editorText.append(QString("onlyKeepBestGenome %1\n").arg(ui->checkBoxOnlyKeepBestGenome->isChecked()));
     editorText.append(QString("onlyKeepBestPopulation %1\n").arg(ui->checkBoxOnlyKeepBestPopulation->isChecked()));
     editorText.append(QString("randomiseModel %1\n").arg(ui->checkBoxRandomiseModel->isChecked()));
+    editorText.append(QString("minimizeScore %1\n").arg(ui->checkBoxMinimizeScore->isChecked()));
 
     editorText.append(QString("crossoverChance %1\n").arg(ui->doubleSpinBoxCrossoverChance->value()));
     editorText.append(QString("duplicationMutationChance %1\n").arg(ui->doubleSpinBoxDuplicationMutationChance->value()));
@@ -127,6 +128,8 @@ void GAParametersDialog::setEditorText(const QString &newEditorText)
     ui->checkBoxOnlyKeepBestPopulation->setChecked(boolV);
     dataFile.RetrieveParameter("randomiseModel", &boolV);
     ui->checkBoxRandomiseModel->setChecked(boolV);
+    dataFile.RetrieveParameter("minimizeScore", &boolV);
+    ui->checkBoxMinimizeScore->setChecked(boolV);
 
     double doubleV;
     dataFile.RetrieveParameter("crossoverChance", &doubleV);

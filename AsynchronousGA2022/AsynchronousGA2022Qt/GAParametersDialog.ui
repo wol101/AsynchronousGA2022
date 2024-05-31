@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>579</width>
-    <height>585</height>
+    <height>618</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -440,24 +440,10 @@
             <string>Switches</string>
            </property>
            <layout class="QGridLayout" name="gridLayout">
-            <item row="0" column="0">
-             <widget class="QCheckBox" name="checkBoxMultipleGaussian">
-              <property name="text">
-               <string>Multiple Gaussian</string>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0">
              <widget class="QCheckBox" name="checkBoxCircularMutation">
               <property name="text">
                <string>Circular Mutation</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QCheckBox" name="checkBoxBounceMutation">
-              <property name="text">
-               <string>Bounce Mutation</string>
               </property>
              </widget>
             </item>
@@ -468,6 +454,27 @@
               </property>
              </widget>
             </item>
+            <item row="5" column="0">
+             <widget class="QCheckBox" name="checkBoxOnlyKeepBestPopulation">
+              <property name="text">
+               <string>Only Keep Best Population</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="checkBoxBounceMutation">
+              <property name="text">
+               <string>Bounce Mutation</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="checkBoxMultipleGaussian">
+              <property name="text">
+               <string>Multiple Gaussian</string>
+              </property>
+             </widget>
+            </item>
             <item row="4" column="0">
              <widget class="QCheckBox" name="checkBoxOnlyKeepBestGenome">
               <property name="text">
@@ -475,10 +482,10 @@
               </property>
              </widget>
             </item>
-            <item row="5" column="0">
-             <widget class="QCheckBox" name="checkBoxOnlyKeepBestPopulation">
+            <item row="6" column="0">
+             <widget class="QCheckBox" name="checkBoxMinimizeScore">
               <property name="text">
-               <string>Only Keep Best Population</string>
+               <string>Minimize Score</string>
               </property>
              </widget>
             </item>
@@ -551,6 +558,36 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>spinBoxGenomeLength</tabstop>
+  <tabstop>spinBoxPopulationSize</tabstop>
+  <tabstop>spinBoxParentsToKeep</tabstop>
+  <tabstop>spinBoxOutputPopulationSize</tabstop>
+  <tabstop>spinBoxMaxReproductions</tabstop>
+  <tabstop>spinBoxImprovementReproductions</tabstop>
+  <tabstop>doubleSpinBoxImprovementThreshold</tabstop>
+  <tabstop>spinBoxSaveBestEvery</tabstop>
+  <tabstop>spinBoxSavePopEvery</tabstop>
+  <tabstop>spinBoxOutputStatsEvery</tabstop>
+  <tabstop>doubleSpinBoxWatchDogTimerLimit</tabstop>
+  <tabstop>doubleSpinBoxGaussianMutationChance</tabstop>
+  <tabstop>doubleSpinBoxFrameShiftMutationChance</tabstop>
+  <tabstop>doubleSpinBoxDuplicationMutationChance</tabstop>
+  <tabstop>doubleSpinBoxCrossoverChance</tabstop>
+  <tabstop>comboBoxParentSelection</tabstop>
+  <tabstop>doubleSpinBoxGamma</tabstop>
+  <tabstop>comboBoxCrossoverType</tabstop>
+  <tabstop>comboBoxResizeControl</tabstop>
+  <tabstop>checkBoxMultipleGaussian</tabstop>
+  <tabstop>checkBoxCircularMutation</tabstop>
+  <tabstop>checkBoxBounceMutation</tabstop>
+  <tabstop>checkBoxRandomiseModel</tabstop>
+  <tabstop>checkBoxOnlyKeepBestGenome</tabstop>
+  <tabstop>checkBoxOnlyKeepBestPopulation</tabstop>
+  <tabstop>checkBoxMinimizeScore</tabstop>
+  <tabstop>pushButtonOK</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
