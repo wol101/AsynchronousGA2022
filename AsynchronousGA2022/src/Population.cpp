@@ -95,6 +95,7 @@ int Population::InsertGenome(Genome &&genome, size_t targetPopulationSize)
     if (targetPopulationSize == 0) targetPopulationSize = originalSize; // not trying to change the size of the population
 
     double fitness = genome.GetFitness();
+    if (m_MinimizeScore) { fitness = -fitness; } // now all the sorting will hapen in reverse
     auto findGenome = m_Population.find(fitness);
     if (findGenome != m_Population.end())
     {

@@ -48,6 +48,7 @@ public:
     void SetGlobalCircularMutation(bool circularMutation);
     void SetResizeControl(ResizeControl control) { m_ResizeControl = control; }
     void SetGamma(double gamma) { m_Gamma = gamma; }
+    void SetMinimizeScore(bool minimizeScore) { m_MinimizeScore = minimizeScore; }
 
     Genome *ChooseParent(size_t *parentRank, Random *random);
     void Randomise(Random *random);
@@ -67,7 +68,7 @@ protected:
     size_t m_ParentsToKeep = 0;
     ResizeControl m_ResizeControl = MutateResize;
     double m_Gamma = 1.0;
-
+    bool m_MinimizeScore = false;
 };
 
 
