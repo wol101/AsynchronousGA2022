@@ -12,7 +12,6 @@
 
 #include "Genome.h"
 
-#include <deque>
 #include <map>
 
 class Random;
@@ -63,7 +62,7 @@ protected:
     std::map<double, Genome> m_population;
     std::vector<double> m_populationIndex; // sorted vector
     std::vector<double> m_immortalListIndex; // sorted vector
-    std::deque<double> m_ageList;
+    std::vector<double> m_ageList; // apparently a vector will be faster than a deque on a modern cpu
     SelectionType m_selectionType = RankBasedSelection;
     size_t m_parentsToKeep = 0;
     ResizeControl m_resizeControl = MutateResize;

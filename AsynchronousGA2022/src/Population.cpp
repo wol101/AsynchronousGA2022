@@ -7,13 +7,10 @@
  *
  */
 
-#include <assert.h>
 #include <iostream>
 #include <fstream>
 #include <memory.h>
-#include <float.h>
 #include <map>
-#include <list>
 #include <cmath>
 #include <limits>
 #include <algorithm>
@@ -22,8 +19,6 @@
 #include "Population.h"
 #include "Random.h"
 #include "Preferences.h"
-
-bool GenomeFitnessLessThan(Genome *g1, Genome *g2);
 
 // constructor
 Population::Population()
@@ -99,10 +94,16 @@ int Population::InsertGenome(Genome &&genome, size_t targetPopulationSize)
     auto findGenome = m_population.find(fitness);
     if (findGenome != m_population.end())
     {
-        // std::cerr << "InsertGenome fitness = " << fitness << " already in population\n";
+#define DEBUG_POPULATION
+#ifdef DEBUG_POPULATION
+        std::cerr << "InsertGenome fitness = " << fitness << " already in population\n";
+#endif
         return __LINE__; // nothing inserted because the fitness already exists
     }
     m_population[fitness] = genome;
+#ifdef DEBUG_POPULATION
+    std::cerr << "m_population.size(()=" << m_population.size() << " genome.GetFitness()=" << genome.GetFitness() << " fitness=" << fitness << "\n";
+#endif
 
     // ok now insert into the other internal lists
     m_populationIndex.insert(std::upper_bound(m_populationIndex.begin(), m_populationIndex.end(), fitness), fitness); // insert at upper bound to minimise shifting
@@ -110,7 +111,9 @@ int Population::InsertGenome(Genome &&genome, size_t targetPopulationSize)
     if (m_parentsToKeep == 0)
     {
         m_ageList.push_back(fitness); // just add current genome to list by age
-        // std::cerr << "InsertGenome adding to m_AgeList - no test; size = " << m_AgeList.size() << "\n";
+#ifdef DEBUG_POPULATION
+        std::cerr << "InsertGenome adding to m_AgeList - no test; size = " << m_ageList.size() << "\n";
+#endif
     }
     else
     {
@@ -118,7 +121,9 @@ int Population::InsertGenome(Genome &&genome, size_t targetPopulationSize)
         if (m_immortalListIndex.size() < m_parentsToKeep)
         {
             m_immortalListIndex.insert(std::upper_bound(m_immortalListIndex.begin(), m_immortalListIndex.end(), fitness), fitness);
-            // std::cerr << "InsertGenome adding to m_ImmortalList - no test; size = " << m_ImmortalList.size() << "\n";
+#ifdef DEBUG_POPULATION
+            std::cerr << "InsertGenome adding to m_immortalListIndex - no test; size = " << m_immortalListIndex.size() << "\n";
+#endif
         }
         else
         {
@@ -127,12 +132,16 @@ int Population::InsertGenome(Genome &&genome, size_t targetPopulationSize)
                 m_immortalListIndex.insert(std::upper_bound(m_immortalListIndex.begin(), m_immortalListIndex.end(), fitness), fitness);
                 m_ageList.push_back(m_immortalListIndex.front());
                 m_immortalListIndex.erase(m_immortalListIndex.begin());
-                // std::cerr << "InsertGenome m_ImmortalList to m_AgeList bump; m_AgeList.size() = " << m_AgeList.size() << " m_ImmortalList.size() = " << m_ImmortalList.size() << "\n";
+#ifdef DEBUG_POPULATION
+                std::cerr << "InsertGenome m_immortalListIndex to m_ageList bump; m_ageList.size() = " << m_ageList.size() << " m_immortalListIndex.size() = " << m_immortalListIndex.size() << "\n";
+#endif
             }
             else
             {
                 m_ageList.push_back(fitness);
-                // std::cerr << "InsertGenome adding to m_AgeList after test; size = " << m_AgeList.size() << "\n";
+#ifdef DEBUG_POPULATION
+                std::cerr << "InsertGenome adding to m_ageList after test; size = " << m_ageList.size() << "\n";
+#endif
             }
         }
     }
@@ -148,7 +157,7 @@ int Population::InsertGenome(Genome &&genome, size_t targetPopulationSize)
             continue;
         }
         double genomeToDelete = *m_ageList.begin();
-        m_ageList.pop_front();
+        m_ageList.erase(m_ageList.begin()); // equivalent to pop_front()
         auto genomeIt = m_population.find(genomeToDelete);
         if (genomeIt != m_population.end())
         {
@@ -199,8 +208,10 @@ void Population::ResizePopulation(size_t size, Random *random)
                 Genome g = m_population.begin()->second;
                 g.Randomise(random);
                 g.SetFitness(std::nextafter(m_populationIndex.back(), std::numeric_limits<double>::max()));
-                m_populationIndex.push_back(g.GetFitness());
-                m_population[g.GetFitness()] = std::move(g);
+                double fitness = g.GetFitness();
+                if (m_minimizeScore) { fitness = -fitness; } // now all the sorting will hapen in reverse
+                m_populationIndex.push_back(fitness);
+                m_population[fitness] = std::move(g);
             }
             break;
 
@@ -211,9 +222,10 @@ void Population::ResizePopulation(size_t size, Random *random)
                 Genome g = m_population.begin()->second;
                 Mating mating(random);
                 while (mating.GaussianMutate(&g, 1.0, true) == 0);
-                g.SetFitness(std::nextafter(m_populationIndex.back(), std::numeric_limits<double>::max()));
-                m_populationIndex.push_back(g.GetFitness());
-                m_population[g.GetFitness()] = std::move(g);
+                double fitness = g.GetFitness();
+                if (m_minimizeScore) { fitness = -fitness; } // now all the sorting will hapen in reverse
+                m_populationIndex.push_back(fitness);
+                m_population[fitness] = std::move(g);
             }
             break;
 
@@ -285,6 +297,7 @@ int Population::ReadPopulation(const char *filename)
         m_populationIndex.clear();
         m_immortalListIndex.clear();
         m_ageList.clear();
+        Random random;
 
         size_t populationSize;
         inFile >> populationSize;
@@ -293,10 +306,15 @@ int Population::ReadPopulation(const char *filename)
         {
             Genome genome;
             inFile >> genome;
-            // std::cerr << "Fitness = " << genome.GetFitness() << "\n";
-            if (i > 0 && m_population.find(genome.GetFitness()) != m_population.end())
+            double fitness = genome.GetFitness();
+            if (m_minimizeScore) { fitness = -fitness; } // now all the sorting will hapen in reverse
+            if (i > 0 && m_population.find(fitness) != m_population.end())
             {
-                genome.SetFitness(std::nextafter(m_populationIndex.back(), std::numeric_limits<double>::max())); // this line forces all the genomes to be inserted since they might not have valid fitnesses
+                while (m_population.find(fitness) != m_population.end())
+                {
+                    fitness = random.RandomDouble(0, 1);
+                }
+                genome.SetFitness(fitness); // this line forces all the genomes to be inserted since they might not have valid fitnesses
                 if (!warningEmitted)
                 {
                     std::cerr << "Warning: population contains duplicate fitness values. Setting to fake values. index first detected = " << i << "\n";

@@ -221,10 +221,5 @@ std::istream& operator>>(std::istream &in, Genome &g)
     return in;
 }
 
-//bool GenomeFitnessLessThan(Genome *g1, Genome *g2)
-//{
-//    if (g1->GetFitness() < g2->GetFitness()) return true;
-//    return false;
-//}
 
 

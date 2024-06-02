@@ -221,6 +221,7 @@ int GAMain::Process(const std::string &parameterFile, const std::string &outputD
     m_startPopulation.SetSelectionType(m_preferences.parentSelection);
     m_startPopulation.SetParentsToKeep(m_preferences.parentsToKeep);
     m_startPopulation.SetGamma(m_preferences.gamma);
+    m_startPopulation.SetMinimizeScore(m_preferences.minimizeScore);
     if (m_startPopulation.ReadPopulation(m_preferences.startingPopulation.c_str()))
     {
         ReportProgress("Error reading starting population: "s + m_preferences.startingPopulation, 0);
@@ -247,6 +248,8 @@ int GAMain::Process(const std::string &parameterFile, const std::string &outputD
     m_evolvePopulation.SetResizeControl(m_preferences.resizeControl);
     m_evolvePopulation.SetSelectionType(m_preferences.parentSelection);
     m_evolvePopulation.SetParentsToKeep(m_preferences.parentsToKeep);
+    m_evolvePopulation.SetGamma(m_preferences.gamma);
+    m_evolvePopulation.SetMinimizeScore(m_preferences.minimizeScore);
 
     if (Evolve())
     {
