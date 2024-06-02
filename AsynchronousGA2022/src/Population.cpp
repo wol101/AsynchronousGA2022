@@ -94,7 +94,7 @@ int Population::InsertGenome(Genome &&genome, size_t targetPopulationSize)
     auto findGenome = m_population.find(fitness);
     if (findGenome != m_population.end())
     {
-#define DEBUG_POPULATION
+//#define DEBUG_POPULATION
 #ifdef DEBUG_POPULATION
         std::cerr << "InsertGenome fitness = " << fitness << " already in population\n";
 #endif
