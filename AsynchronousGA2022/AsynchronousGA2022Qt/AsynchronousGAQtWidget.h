@@ -134,6 +134,9 @@ private:
     std::string m_xmlMasterFile;
     std::string m_startingPopulationFile;
 
+    std::string m_startExpressionMarker = {"[["};
+    std::string m_endExpressionMarker = {"]]"};
+
     void createActions();
     void createMenus();
     void readSettings();

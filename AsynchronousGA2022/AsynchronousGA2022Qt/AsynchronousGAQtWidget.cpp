@@ -1178,6 +1178,9 @@ void AsynchronousGAQtWidget::open(const QString &fileName)
                 ui->doubleSpinBoxOutputCycle->setValue(e.attribute("outputCycle").toDouble());
                 ui->checkBoxMergeXMLActivate->setChecked(QVariant(e.attribute("mergeXMLActivate")).toBool());
                 ui->checkBoxCycleTime->setChecked(QVariant(e.attribute("cycle")).toBool());
+
+                m_startExpressionMarker = e.attribute("startExpressionMarker", "[[").toStdString();
+                m_endExpressionMarker = e.attribute("endExpressionMarker", "]]").toStdString();
             }
         }
         n = n.nextSibling();
@@ -1230,6 +1233,9 @@ void AsynchronousGAQtWidget::save()
     dataItemsElement.setAttribute("outputCycle", ui->doubleSpinBoxOutputCycle->text());
     dataItemsElement.setAttribute("mergeXMLActivate", QString::number(ui->checkBoxMergeXMLActivate->isChecked() ? 1 : 0));
     dataItemsElement.setAttribute("cycle", QString::number(ui->checkBoxCycleTime->isChecked() ? 1 : 0));
+
+    dataItemsElement.setAttribute("startExpressionMarker", QString::fromStdString(m_startExpressionMarker));
+    dataItemsElement.setAttribute("endExpressionMarker", QString::fromStdString(m_endExpressionMarker));
 
     // and now the actual xml doc
     QByteArray xmlData = doc.toByteArray();
