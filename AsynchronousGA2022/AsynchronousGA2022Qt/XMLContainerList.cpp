@@ -21,21 +21,21 @@ XMLContainerList::XMLContainerList()
 // note, list allocation is left unchanged
 void XMLContainerList::Clear()
 {
-    mListObjects.clear();
+    m_listObjects.clear();
 }
 
 // add an object
 void XMLContainerList::Add(std::unique_ptr<XMLContainer> object)
 {
-    mListObjects.push_back(std::move(object));
+    m_listObjects.push_back(std::move(object));
 }
 
 // retrieve an object by number
 XMLContainer *XMLContainerList::Get(int index)
 {
-   if (index < 0 || index >= int(mListObjects.size())) return nullptr;
+   if (index < 0 || index >= int(m_listObjects.size())) return nullptr;
 
-   return mListObjects[size_t(index)].get();
+   return m_listObjects[size_t(index)].get();
 }
 
 // retrieve an object by name
@@ -49,9 +49,9 @@ XMLContainer *XMLContainerList::Get(const std::string &name)
 // returns -1 if object name not found
 int XMLContainerList::Find(const std::string &name)
 {
-   for (size_t i = 0; i < mListObjects.size(); i++)
+   for (size_t i = 0; i < m_listObjects.size(); i++)
    {
-       if (mListObjects[i]->GetName() == name) return int(i);
+       if (m_listObjects[i]->GetName() == name) return int(i);
    }
    return -1;
 }

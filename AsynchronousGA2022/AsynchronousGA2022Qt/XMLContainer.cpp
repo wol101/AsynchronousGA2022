@@ -33,8 +33,8 @@ XMLContainer::XMLContainer()
 
 XMLContainer::~XMLContainer()
 {
-    if (m_Doc) delete m_Doc;
-    if (m_DocFile) delete m_DocFile;
+    if (m_doc) delete m_doc;
+    if (m_docFile) delete m_docFile;
 }
 
 
@@ -42,35 +42,35 @@ int XMLContainer::LoadXML(const char *filename)
 {
     rapidxml::xml_node<char> *cur;
 
-    if (m_Doc) delete m_Doc;
-    if (m_DocFile) delete m_DocFile;
+    if (m_doc) delete m_doc;
+    if (m_docFile) delete m_docFile;
 
-    m_Doc = new rapidxml::xml_document<char>();
-    m_DocFile = new DataFile();
+    m_doc = new rapidxml::xml_document<char>();
+    m_docFile = new DataFile();
 
-    if (m_DocFile->ReadFile(filename)) return 1;
+    if (m_docFile->ReadFile(filename)) return 1;
 
-    char *data = m_DocFile->GetRawData();
+    char *data = m_docFile->GetRawData();
     CleanExpressions(data);
 
     // do the basic XML parsing
-    m_Doc->parse<rapidxml::parse_default>(data);
+    m_doc->parse<rapidxml::parse_default>(data);
 
-    cur = m_Doc->first_node();
+    cur = m_doc->first_node();
     if (cur == nullptr)
     {
         fprintf(stderr,"Empty document\n");
         return 1;
     }
 
-    m_RootNode = cur->name();
+    m_rootNode = cur->name();
 
     // now parse the elements in the file
 
     cur = cur->first_node();
     while (cur)
     {
-        m_TagContentsList.push_back(cur);
+        m_tagContentsList.push_back(cur);
         cur = cur->next_sibling();
     }
 
@@ -83,14 +83,14 @@ int XMLContainer::WriteXML(const char *filename)
     std::stringstream outputStream;
     outputStream.precision(17);
 
-    outputStream << "<" << m_RootNode << ">\n\n";
+    outputStream << "<" << m_rootNode << ">\n\n";
 
-    for (unsigned int i = 0; i < m_TagContentsList.size(); i++)
+    for (unsigned int i = 0; i < m_tagContentsList.size(); i++)
     {
-        outputStream << (*m_TagContentsList[i]) << "\n";
+        outputStream << (*m_tagContentsList[i]) << "\n";
     }
 
-    outputStream << "</" << m_RootNode << ">\n\n";
+    outputStream << "</" << m_rootNode << ">\n\n";
 
     std::string buf = outputStream.str();
     RecoverExpressions(&buf[0]);
@@ -122,15 +122,15 @@ int XMLContainer::Merge(XMLContainer *sim, const char *element, const char *idAt
     tagToMerge = element;
 
     // now look for this tag locally
-    for (localTagIndex = 0; localTagIndex < m_TagContentsList.size(); localTagIndex++)
+    for (localTagIndex = 0; localTagIndex < m_tagContentsList.size(); localTagIndex++)
     {
-        localNodePtr = m_TagContentsList[localTagIndex];
+        localNodePtr = m_tagContentsList[localTagIndex];
         if (strcmp(tagToMerge.c_str(), localNodePtr->name()) == 0) // name match
         {
             // now look for this tag remotely
-            for (remoteTagIndex = 0; remoteTagIndex < sim->m_TagContentsList.size(); remoteTagIndex++)
+            for (remoteTagIndex = 0; remoteTagIndex < sim->m_tagContentsList.size(); remoteTagIndex++)
             {
-                remoteNodePtr = sim->m_TagContentsList[remoteTagIndex];
+                remoteNodePtr = sim->m_tagContentsList[remoteTagIndex];
                 if (strcmp(tagToMerge.c_str(), remoteNodePtr->name()) == 0) // name match
                 {
                     matchOK = true;
@@ -179,15 +179,15 @@ int XMLContainer::MergeID(XMLContainer *sim, const char *element, const char *id
     tagToMerge = element;
 
     // now look for this tag locally
-    for (localTagIndex = 0; localTagIndex < m_TagContentsList.size(); localTagIndex++)
+    for (localTagIndex = 0; localTagIndex < m_tagContentsList.size(); localTagIndex++)
     {
-        localNodePtr = m_TagContentsList[localTagIndex];
+        localNodePtr = m_tagContentsList[localTagIndex];
         if (strcmp(tagToMerge.c_str(), localNodePtr->name()) == 0) // name match
         {
             // now look for this tag remotely
-            for (remoteTagIndex = 0; remoteTagIndex < sim->m_TagContentsList.size(); remoteTagIndex++)
+            for (remoteTagIndex = 0; remoteTagIndex < sim->m_tagContentsList.size(); remoteTagIndex++)
             {
-                remoteNodePtr = sim->m_TagContentsList[remoteTagIndex];
+                remoteNodePtr = sim->m_tagContentsList[remoteTagIndex];
                 if (strcmp(tagToMerge.c_str(), remoteNodePtr->name()) == 0) // name match
                 {
                     matchOK = true;
@@ -261,7 +261,7 @@ int XMLContainer::Merge(rapidxml::xml_node<char> *node1, rapidxml::xml_node<char
 
     for (int i = startIndex; i <= endIndex; i++)
     {
-        if (m_XMLContainerVerbosityLevel > 2) std::cerr << "XMLContainer::Merge Merge " << proportion << " " << list1[i] << " " << list2[i] << "\n";
+        if (m_xmkContainerVerbosityLevel > 2) std::cerr << "XMLContainer::Merge Merge " << proportion << " " << list1[i] << " " << list2[i] << "\n";
         if (strchr("+-0123456789", list1[i][0]) && strchr("+-0123456789", list2[i][0])) // quick and dirty check for a number
         {
             v1 = MergeUtil::Double(list1[i].c_str());
@@ -288,7 +288,7 @@ int XMLContainer::Merge(rapidxml::xml_node<char> *node1, rapidxml::xml_node<char
 
     attrPtr = DoXmlReplaceProp(node1, name, out.str().c_str());
     if (attrPtr == nullptr) return 1;
-    if (m_XMLContainerVerbosityLevel > 1) std::cerr << "XMLContainer::Merge DoXmlReplaceProp \"" << name << "\" \"" << out.str() << "\"\n";
+    if (m_xmkContainerVerbosityLevel > 1) std::cerr << "XMLContainer::Merge DoXmlReplaceProp \"" << name << "\" \"" << out.str() << "\"\n";
     return 0;
 }
 
@@ -368,9 +368,9 @@ int XMLContainer::Operate(const char *operation, const char *element, const char
     tagToChange = element;
 
     // now look for the element
-    for (localTagIndex = 0; localTagIndex < m_TagContentsList.size(); localTagIndex++)
+    for (localTagIndex = 0; localTagIndex < m_tagContentsList.size(); localTagIndex++)
     {
-        localNodePtr = m_TagContentsList[localTagIndex];
+        localNodePtr = m_tagContentsList[localTagIndex];
         if (strcmp(tagToChange.c_str(), localNodePtr->name()) == 0) // name match
         {
             localBuf = DoXmlGetProp(localNodePtr, idAttribute);
@@ -398,11 +398,11 @@ int XMLContainer::Operate(const char *operation, const char *element, const char
                             {
                                 return 1;
                             }
-                            if (m_XMLContainerVerbosityLevel > 1) std::cerr << "XMLContainer::Operate DoXmlReplaceProp \"" << changeAttribute << "\" \"" << out.str() << "\"\n";
+                            if (m_xmkContainerVerbosityLevel > 1) std::cerr << "XMLContainer::Operate DoXmlReplaceProp \"" << changeAttribute << "\" \"" << out.str() << "\"\n";
                         }
                         else
                         {
-                            if (m_XMLContainerVerbosityLevel > 1) std::cerr << "XMLContainer::Operate offset >= n1\n";
+                            if (m_xmkContainerVerbosityLevel > 1) std::cerr << "XMLContainer::Operate offset >= n1\n";
                         }
                     }
                 }
@@ -424,9 +424,9 @@ int XMLContainer::Global(const char *globalName, const char *element, const char
     tagToChange = element;
 
     // now look for the element
-    for (localTagIndex = 0; localTagIndex < m_TagContentsList.size(); localTagIndex++)
+    for (localTagIndex = 0; localTagIndex < m_tagContentsList.size(); localTagIndex++)
     {
-        localNodePtr = m_TagContentsList[localTagIndex];
+        localNodePtr = m_tagContentsList[localTagIndex];
         if (strcmp(tagToChange.c_str(), localNodePtr->name()) == 0) // name match
         {
             localBuf = DoXmlGetProp(localNodePtr, idAttribute);
@@ -444,11 +444,11 @@ int XMLContainer::Global(const char *globalName, const char *element, const char
                             std::ostringstream out;
                             out.precision(17);
                             (*extraVariables)[globalName] = MergeUtil::Double(tokens[offset].c_str());
-                            if (m_XMLContainerVerbosityLevel > 1) std::cerr << "XMLContainer::Global DoXmlReplaceProp \"" << changeAttribute << "\" " << globalName << " = " << (*extraVariables)[globalName] << "\n";
+                            if (m_xmkContainerVerbosityLevel > 1) std::cerr << "XMLContainer::Global DoXmlReplaceProp \"" << changeAttribute << "\" " << globalName << " = " << (*extraVariables)[globalName] << "\n";
                         }
                         else
                         {
-                            if (m_XMLContainerVerbosityLevel > 1) std::cerr << "XMLContainer::Global offset >= n1\n";
+                            if (m_xmkContainerVerbosityLevel > 1) std::cerr << "XMLContainer::Global offset >= n1\n";
                         }
                     }
                 }
@@ -469,9 +469,9 @@ int XMLContainer::Set(const char *operation, const char *element, const char *id
     tagToChange = element;
 
     // now look for the element
-    for (localTagIndex = 0; localTagIndex < m_TagContentsList.size(); localTagIndex++)
+    for (localTagIndex = 0; localTagIndex < m_tagContentsList.size(); localTagIndex++)
     {
-        localNodePtr = m_TagContentsList[localTagIndex];
+        localNodePtr = m_tagContentsList[localTagIndex];
         if (strcmp(tagToChange.c_str(), localNodePtr->name()) == 0) // name match
         {
             localBuf = DoXmlGetProp(localNodePtr, idAttribute);
@@ -485,7 +485,7 @@ int XMLContainer::Set(const char *operation, const char *element, const char *id
                         if (offset < 0)
                         {
                             DoXmlReplaceProp(localNodePtr, changeAttribute, operation);
-                            if (m_XMLContainerVerbosityLevel > 1)
+                            if (m_xmkContainerVerbosityLevel > 1)
                                 std::cerr << "XMLContainer::Set DoXmlReplaceProp \"" << changeAttribute << "\" \"" << operation << "\"\n";
                         }
                         else
@@ -507,12 +507,12 @@ int XMLContainer::Set(const char *operation, const char *element, const char *id
                                 {
                                     return 1;
                                 }
-                                if (m_XMLContainerVerbosityLevel > 1)
+                                if (m_xmkContainerVerbosityLevel > 1)
                                     std::cerr << "XMLContainer::Set DoXmlReplaceProp \"" << changeAttribute << "\" \"" << out.str() << "\"\n";
                             }
                             else
                             {
-                                if (m_XMLContainerVerbosityLevel > 1)
+                                if (m_xmkContainerVerbosityLevel > 1)
                                     std::cerr << "XMLContainer::Set offset > n1\n";
                             }
                         }
@@ -536,9 +536,9 @@ int XMLContainer::Scale(const char *operation, const char *element, const char *
     tagToChange = element;
 
     // now look for the element
-    for (localTagIndex = 0; localTagIndex < m_TagContentsList.size(); localTagIndex++)
+    for (localTagIndex = 0; localTagIndex < m_tagContentsList.size(); localTagIndex++)
     {
-        localNodePtr = m_TagContentsList[localTagIndex];
+        localNodePtr = m_tagContentsList[localTagIndex];
         if (strcmp(tagToChange.c_str(), localNodePtr->name()) == 0) // name match
         {
             localBuf = DoXmlGetProp(localNodePtr, idAttribute);
@@ -573,12 +573,12 @@ int XMLContainer::Scale(const char *operation, const char *element, const char *
                             {
                                 return 1;
                             }
-                            if (m_XMLContainerVerbosityLevel > 1)
+                            if (m_xmkContainerVerbosityLevel > 1)
                                 std::cerr << "XMLContainer::Scale DoXmlReplaceProp \"" << idValueStore << "\" \"" << changeAttribute << "\" \"" << out.str() << "\"\n";
                         }
                         else
                         {
-                            if (m_XMLContainerVerbosityLevel > 1)
+                            if (m_xmkContainerVerbosityLevel > 1)
                                 std::cerr << "XMLContainer::Scale must have 4 elements in property\n";
                         }
                     }
@@ -601,9 +601,9 @@ int XMLContainer::Swap(const char *element, const char *idAttribute, const char 
     tagToChange = element;
 
     // now look for the element
-    for (localTagIndex = 0; localTagIndex < m_TagContentsList.size(); localTagIndex++)
+    for (localTagIndex = 0; localTagIndex < m_tagContentsList.size(); localTagIndex++)
     {
-        localNodePtr = m_TagContentsList[localTagIndex];
+        localNodePtr = m_tagContentsList[localTagIndex];
         if (strcmp(tagToChange.c_str(), localNodePtr->name()) == 0) // name match
         {
             localBuf = DoXmlGetProp(localNodePtr, idAttribute);
@@ -631,12 +631,12 @@ int XMLContainer::Swap(const char *element, const char *idAttribute, const char 
                             {
                                 return 1;
                             }
-                            if (m_XMLContainerVerbosityLevel > 1)
+                            if (m_xmkContainerVerbosityLevel > 1)
                                 std::cerr << "XMLContainer::Swap DoXmlReplaceProp \"" << changeAttribute << "\" \"" << out.str() << "\"\n";
                         }
                         else
                         {
-                            if (m_XMLContainerVerbosityLevel > 1)
+                            if (m_xmkContainerVerbosityLevel > 1)
                                 std::cerr << "XMLContainer::Operate offset >= n1\n";
                         }
                     }
@@ -659,9 +659,9 @@ int XMLContainer::Generate(const char *operation, const char *element, const cha
     tagToChange = element;
 
     // now look for the element
-    for (localTagIndex = 0; localTagIndex < m_TagContentsList.size(); localTagIndex++)
+    for (localTagIndex = 0; localTagIndex < m_tagContentsList.size(); localTagIndex++)
     {
-        localNodePtr = m_TagContentsList[localTagIndex];
+        localNodePtr = m_tagContentsList[localTagIndex];
         if (strcmp(tagToChange.c_str(), localNodePtr->name()) == 0) // name match
         {
             localBuf = DoXmlGetProp(localNodePtr, idAttribute);
@@ -672,7 +672,7 @@ int XMLContainer::Generate(const char *operation, const char *element, const cha
                     rapidxml::xml_attribute<char> *ptr = DoXmlReplaceProp(localNodePtr, changeAttribute, operation);
                     if (ptr)
                     {
-                        if (m_XMLContainerVerbosityLevel > 1)
+                        if (m_xmkContainerVerbosityLevel > 1)
                             std::cerr << "XMLContainer::Generate \"" << changeAttribute << "\" \"" << element << "\"\n";
                     }
                 }
@@ -694,9 +694,9 @@ int XMLContainer::Delete(const char *element, const char *idAttribute, const cha
     tagToChange = element;
 
     // now look for the element
-    for (localTagIndex = 0; localTagIndex < m_TagContentsList.size(); localTagIndex++)
+    for (localTagIndex = 0; localTagIndex < m_tagContentsList.size(); localTagIndex++)
     {
-        localNodePtr = m_TagContentsList[localTagIndex];
+        localNodePtr = m_tagContentsList[localTagIndex];
         if (strcmp(tagToChange.c_str(), localNodePtr->name()) == 0) // name match
         {
             localBuf = DoXmlGetProp(localNodePtr, idAttribute);
@@ -724,9 +724,9 @@ int XMLContainer::Create(const char *element, const char *idAttribute, const cha
     tagToCreate = element;
 
     // now look for the element
-    for (localTagIndex = 0; localTagIndex < m_TagContentsList.size(); localTagIndex++)
+    for (localTagIndex = 0; localTagIndex < m_tagContentsList.size(); localTagIndex++)
     {
-        localNodePtr = m_TagContentsList[localTagIndex];
+        localNodePtr = m_tagContentsList[localTagIndex];
         if (strcmp(tagToCreate.c_str(), localNodePtr->name()) == 0) // name match
         {
             localBuf = DoXmlGetProp(localNodePtr, idAttribute);
@@ -739,10 +739,10 @@ int XMLContainer::Create(const char *element, const char *idAttribute, const cha
             }
         }
     }
-    rapidxml::xml_node<char> *newNode = CreateNewNode(m_Doc->first_node(), element);
+    rapidxml::xml_node<char> *newNode = CreateNewNode(m_doc->first_node(), element);
     if (!newNode) return __LINE__;
     DoXmlReplaceProp(newNode, idAttribute, idValue);
-    m_TagContentsList.push_back(newNode);
+    m_tagContentsList.push_back(newNode);
 
     return 0;
 }
@@ -750,7 +750,7 @@ int XMLContainer::Create(const char *element, const char *idAttribute, const cha
 char *XMLContainer::DoXmlGetProp(rapidxml::xml_node<char> *cur, const char *name)
 {
     char *buf = nullptr;
-    if (m_CaseSensitiveXMLAttributes)
+    if (m_caseSensitiveXMLAttributes)
     {
         for (rapidxml::xml_attribute<char> *attr = cur->first_attribute(); attr; attr = attr->next_attribute())
         {
@@ -779,7 +779,7 @@ char *XMLContainer::DoXmlGetProp(rapidxml::xml_node<char> *cur, const char *name
 rapidxml::xml_attribute<char> *XMLContainer::DoXmlReplaceProp(rapidxml::xml_node<char> *cur, const char *name, const char *newValue)
 {
     rapidxml::xml_attribute<char> *ptr = 0;
-    if (m_CaseSensitiveXMLAttributes)
+    if (m_caseSensitiveXMLAttributes)
     {
         for (rapidxml::xml_attribute<char> *attr = cur->first_attribute(); attr; attr = attr->next_attribute())
         {
@@ -813,7 +813,7 @@ rapidxml::xml_attribute<char> *XMLContainer::DoXmlReplaceProp(rapidxml::xml_node
 void XMLContainer::DoXmlRemoveProp(rapidxml::xml_node<char> *cur, const char *name)
 {
     rapidxml::xml_attribute<char> *ptr = nullptr;
-    if (m_CaseSensitiveXMLAttributes)
+    if (m_caseSensitiveXMLAttributes)
     {
         for (rapidxml::xml_attribute<char> *attr = cur->first_attribute(); attr; attr = attr->next_attribute())
         {
@@ -842,7 +842,7 @@ void XMLContainer::DoXmlRemoveProp(rapidxml::xml_node<char> *cur, const char *na
 rapidxml::xml_attribute<char> *XMLContainer::DoXmlHasProp(rapidxml::xml_node<char> *cur, const char *name)
 {
     rapidxml::xml_attribute<char> *ptr = nullptr;
-    if (m_CaseSensitiveXMLAttributes)
+    if (m_caseSensitiveXMLAttributes)
     {
         for (rapidxml::xml_attribute<char> *attr = cur->first_attribute(); attr; attr = attr->next_attribute())
         {

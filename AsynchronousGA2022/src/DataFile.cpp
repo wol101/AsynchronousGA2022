@@ -53,18 +53,18 @@ DataFile::~DataFile()
 
 void DataFile::SetRawData(const char *string, size_t stringLen)
 {
-    if (stringLen == 0) m_Size = strlen(string) + 1;
-    else m_Size = stringLen + 1;
-    m_FileData = std::make_unique<char[]>(m_Size);
-    memcpy(m_FileData.get(), string, m_Size);
-    m_Index = m_FileData.get();
+    if (stringLen == 0) m_size = strlen(string) + 1;
+    else m_size = stringLen + 1;
+    m_fileData = std::make_unique<char[]>(m_size);
+    memcpy(m_fileData.get(), string, m_size);
+    m_index = m_fileData.get();
 }
 
 void DataFile::ClearData()
 {
-    m_Size = 0;
-    m_FileData.reset();
-    m_Index = nullptr;
+    m_size = 0;
+    m_fileData.reset();
+    m_index = nullptr;
 }
 
 size_t DataFile::Replace(const std::string &oldString, const std::string &newString)
@@ -77,10 +77,10 @@ size_t DataFile::Replace(const char *oldString, size_t oldLen, const char *newSt
 {
     std::vector<char *> startPtrs;
     std::vector<size_t> lengths;
-    char *startPtr = m_FileData.get();
+    char *startPtr = m_fileData.get();
     char *foundPtr = strstr(startPtr, oldString);
     if (!foundPtr) return 0;
-    char *endPtr = startPtr + m_Size;
+    char *endPtr = startPtr + m_size;
     size_t count = 1;
     startPtrs.push_back(startPtr);
     lengths.push_back(foundPtr - startPtr);
@@ -101,7 +101,7 @@ size_t DataFile::Replace(const char *oldString, size_t oldLen, const char *newSt
     startPtrs.push_back(startPtr);
     lengths.push_back(endPtr - startPtr);
 
-    size_t newSize = m_Size + (newLen - oldLen) * count;
+    size_t newSize = m_size + (newLen - oldLen) * count;
     auto newBuffer = std::make_unique<char[]>(newSize + 1);
     char *destPtr = newBuffer.get();
     for (size_t i = 0; i < startPtrs.size(); i++)
@@ -113,8 +113,8 @@ size_t DataFile::Replace(const char *oldString, size_t oldLen, const char *newSt
     }
     assert(size_t(destPtr - newBuffer.get()) == newSize);
     *destPtr = 0;
-    m_FileData = std::move(newBuffer);
-    m_Size = newSize;
+    m_fileData = std::move(newBuffer);
+    m_size = newSize;
     return count;
 }
 
@@ -125,7 +125,7 @@ size_t DataFile::Replace(const char *oldString, size_t oldLen, const char *newSt
 bool DataFile::ReadFile(const std::string &name)
 {
 #if (defined(_WIN32) || defined(WIN32)) && !defined(__MINGW32__)
-    m_PathName = name;
+    m_pathName = name;
     return ReadFile(ConvertUTF8ToWide(name));
 #else
     struct stat fileStat;
@@ -241,22 +241,22 @@ bool DataFile::ReadFile(const std::wstring &name)
     int error;
 
     ClearData();
-    m_WPathName = name;
+    m_wPathName = name;
 
     error = _wstat64(name.c_str(), &fileStat);
-    if (error && m_ExitOnErrorFlag)
+    if (error && m_exitOnErrorFlag)
     {
         std::wcerr << L"Error: DataFile::ReadFile(" << name << L") - Cannot stat file\n";
         exit(1);
     }
     if (error) return true;
-    m_FileData = std::make_unique<char[]>(size_t(fileStat.st_size) + 1);
-    m_Index = m_FileData.get();
-    m_Size = size_t(fileStat.st_size);
-    m_FileData[m_Size] = 0;
+    m_fileData = std::make_unique<char[]>(size_t(fileStat.st_size) + 1);
+    m_index = m_fileData.get();
+    m_size = size_t(fileStat.st_size);
+    m_fileData[m_size] = 0;
 
     in = _wfopen(name.c_str(), L"rb");
-    if (in == nullptr && m_ExitOnErrorFlag)
+    if (in == nullptr && m_exitOnErrorFlag)
     {
         std::wcerr << L"Error: DataFile::ReadFile(" << name << L") - Cannot open file\n";
         exit(1);
@@ -267,8 +267,8 @@ bool DataFile::ReadFile(const std::wstring &name)
         read_block = (size_t(fileStat.st_size) - index);
         if (read_block > max_read_block) read_block = max_read_block;
         count = read_block;
-        count = fread(m_FileData.get() + index, count, 1, in);
-        if (count != 1 && m_ExitOnErrorFlag)
+        count = fread(m_fileData.get() + index, count, 1, in);
+        if (count != 1 && m_exitOnErrorFlag)
         {
             std::wcerr << L"Error: DataFile::ReadFile(" << name << L") - Cannot read file\n";
             exit(1);
@@ -291,7 +291,7 @@ bool DataFile::WriteFile(const std::wstring &name, bool binary)
 
     if (out == nullptr)
     {
-        if (m_ExitOnErrorFlag)
+        if (m_exitOnErrorFlag)
         {
             std::wcerr << L"Error: DataFile::WriteFile(" << name << L") - Cannot open file\n";
             exit(1);
@@ -300,12 +300,12 @@ bool DataFile::WriteFile(const std::wstring &name, bool binary)
     }
 
     // write file
-    if (binary) count = fwrite(m_FileData.get(), m_Size, 1, out);
-    else count = fwrite(m_FileData.get(), strlen(m_FileData.get()), 1, out);
+    if (binary) count = fwrite(m_fileData.get(), m_size, 1, out);
+    else count = fwrite(m_fileData.get(), strlen(m_fileData.get()), 1, out);
 
     if (count != 1)
     {
-        if (m_ExitOnErrorFlag)
+        if (m_exitOnErrorFlag)
         {
             std::wcerr << L"Error: DataFile::WriteFile(" << name << L") - Cannot write file\n";
             exit(1);
@@ -315,7 +315,7 @@ bool DataFile::WriteFile(const std::wstring &name, bool binary)
 
     if (fclose(out))
     {
-        if (m_ExitOnErrorFlag)
+        if (m_exitOnErrorFlag)
         {
             std::wcerr << L"Error: DataFile::WriteFile(" << name << L") - Cannot close file\n";
             exit(1);
@@ -463,18 +463,18 @@ bool DataFile::FindParameter(const char * const param,
     char *p;
     size_t len = strlen(param);
 
-    if (searchFromStart) p = m_FileData.get();
-    else p = m_Index;
+    if (searchFromStart) p = m_fileData.get();
+    else p = m_index;
 
     while (1)
     {
         p = strstr(p, param);
         if (p == nullptr) break; // not found at all
-        if (p == m_FileData.get()) // at beginning of file
+        if (p == m_fileData.get()) // at beginning of file
         {
             if (*(p + len) < 33) // ends with whitespace
             {
-                m_Index = p + len;
+                m_index = p + len;
                 return false;
             }
         }
@@ -484,14 +484,14 @@ bool DataFile::FindParameter(const char * const param,
             {
                 if (*(p + len) < 33) // ends with whitespace
                 {
-                    m_Index = p + len;
+                    m_index = p + len;
                     return false;
                 }
             }
         }
         p += len;
     }
-    if (m_ExitOnErrorFlag)
+    if (m_exitOnErrorFlag)
     {
         std::cerr << "Error: DataFile::FindParameter(" << param
         << " - could not find parameter\n";
@@ -507,25 +507,25 @@ bool DataFile::ReadNext(char *val, size_t size)
     size_t len = 0;
 
     // find non-whitespace
-    while (*m_Index < 33)
+    while (*m_index < 33)
     {
-        if (*m_Index == 0 && m_ExitOnErrorFlag)
+        if (*m_index == 0 && m_exitOnErrorFlag)
         {
             std::cerr << "Error: DataFile::ReadNext no non-whitespace found\n";
             exit(1);
         }
-        if (*m_Index == 0) return true;
-        m_Index++;
+        if (*m_index == 0) return true;
+        m_index++;
     }
 
-    if (*m_Index == '\"') return ReadNextQuotedString(val, size);
+    if (*m_index == '\"') return ReadNextQuotedString(val, size);
 
     // copy until whitespace
-    while (*m_Index > 32)
+    while (*m_index > 32)
     {
-        *val = *m_Index;
+        *val = *m_index;
         val++;
-        m_Index++;
+        m_index++;
         len++;
         if (len == size - 1) break;
     }
@@ -541,24 +541,24 @@ bool DataFile::ReadNext(char **val, size_t *size)
     *size = 0;
 
     // find non-whitespace
-    while (*m_Index < 33)
+    while (*m_index < 33)
     {
-        if (*m_Index == 0 && m_ExitOnErrorFlag)
+        if (*m_index == 0 && m_exitOnErrorFlag)
         {
             std::cerr << "Error: DataFile::ReadNext no non-whitespace found\n";
             exit(1);
         }
-        if (*m_Index == 0) return true;
-        m_Index++;
+        if (*m_index == 0) return true;
+        m_index++;
     }
 
-    if (*m_Index == '\"') return ReadNextQuotedString(val, size);
+    if (*m_index == '\"') return ReadNextQuotedString(val, size);
 
-    *val = m_Index;
+    *val = m_index;
     // count until whitespace
-    while (*m_Index > 32)
+    while (*m_index > 32)
     {
-        m_Index++;
+        m_index++;
         (*size)++;
     }
     return false;
@@ -569,24 +569,24 @@ bool DataFile::ReadNext(char **val, size_t *size)
 bool DataFile::ReadNext(std::string *val)
 {
     // find non-whitespace
-    while (*m_Index < 33)
+    while (*m_index < 33)
     {
-        if (*m_Index == 0 && m_ExitOnErrorFlag)
+        if (*m_index == 0 && m_exitOnErrorFlag)
         {
             std::cerr << "Error: DataFile::ReadNext no non-whitespace found\n";
             exit(1);
         }
-        if (*m_Index == 0) return true;
-        m_Index++;
+        if (*m_index == 0) return true;
+        m_index++;
     }
 
-    if (*m_Index == '\"') return ReadNextQuotedString(val);
+    if (*m_index == '\"') return ReadNextQuotedString(val);
 
     // copy until whitespace
     val->clear();
-    while (*m_Index > 32)
+    while (*m_index > 32)
     {
-        *val += *m_Index++;
+        *val += *m_index++;
     }
     return false;
 }
@@ -599,8 +599,8 @@ bool DataFile::ReadNextQuotedString(char *val, size_t size)
     char *end;
     size_t len;
 
-    start = strstr(m_Index, "\"");
-    if (start == nullptr && m_ExitOnErrorFlag)
+    start = strstr(m_index, "\"");
+    if (start == nullptr && m_exitOnErrorFlag)
     {
         std::cerr << "Error: DataFile::ReadNextQuotedString could not find opening \"\n";
         exit(1);
@@ -608,7 +608,7 @@ bool DataFile::ReadNextQuotedString(char *val, size_t size)
     if (start == nullptr) return true;
 
     end = strstr(start + 1, "\"");
-    if (end == nullptr && m_ExitOnErrorFlag)
+    if (end == nullptr && m_exitOnErrorFlag)
     {
         std::cerr << "Error: DataFile::ReadNextQuotedString could not find closing \"\n";
         exit(1);
@@ -617,7 +617,7 @@ bool DataFile::ReadNextQuotedString(char *val, size_t size)
 
     len = size_t(end - start - 1); // this is always greater than 0
     if (len >= size) len = size - 1;
-    m_Index = start + len + 2;
+    m_index = start + len + 2;
     memcpy(val, start + 1, len);
     val[len] = 0;
 
@@ -632,8 +632,8 @@ bool DataFile::ReadNextQuotedString(char **val, size_t *size)
     char *start;
     char *end;
 
-    start = strstr(m_Index, "\"");
-    if (start == nullptr && m_ExitOnErrorFlag)
+    start = strstr(m_index, "\"");
+    if (start == nullptr && m_exitOnErrorFlag)
     {
         std::cerr << "Error: DataFile::ReadNextQuotedString could not find opening \"\n";
         exit(1);
@@ -641,7 +641,7 @@ bool DataFile::ReadNextQuotedString(char **val, size_t *size)
     if (start == nullptr) return true;
 
     end = strstr(start + 1, "\"");
-    if (end == nullptr && m_ExitOnErrorFlag)
+    if (end == nullptr && m_exitOnErrorFlag)
     {
         std::cerr << "Error: DataFile::ReadNextQuotedString could not find closing \"\n";
         exit(1);
@@ -649,7 +649,7 @@ bool DataFile::ReadNextQuotedString(char **val, size_t *size)
     if (end == nullptr) return true;
 
     *size = size_t(end - start - 1); // this is always greater than 0
-    m_Index = start + *size + 2;
+    m_index = start + *size + 2;
     *val = start + 1;
 
     return false;
@@ -663,8 +663,8 @@ bool DataFile::ReadNextQuotedString(std::string *val)
     char *end;
     size_t len;
 
-    start = strstr(m_Index, "\"");
-    if (start == nullptr && m_ExitOnErrorFlag)
+    start = strstr(m_index, "\"");
+    if (start == nullptr && m_exitOnErrorFlag)
     {
         std::cerr << "Error: DataFile::ReadNextQuotedString could not find opening \"\n";
         exit(1);
@@ -672,7 +672,7 @@ bool DataFile::ReadNextQuotedString(std::string *val)
     if (start == nullptr) return true;
 
     end = strstr(start + 1, "\"");
-    if (end == nullptr && m_ExitOnErrorFlag)
+    if (end == nullptr && m_exitOnErrorFlag)
     {
         std::cerr << "Error: DataFile::ReadNextQuotedString could not find closing \"\n";
         exit(1);
@@ -680,7 +680,7 @@ bool DataFile::ReadNextQuotedString(std::string *val)
     if (end == nullptr) return true;
 
     len = size_t(end - start - 1); // this is always greater than 0
-    m_Index = start + len + 2;
+    m_index = start + len + 2;
     val->clear();
     std::copy(start + 1, start + 1 + len, std::back_inserter(*val));
 
@@ -719,7 +719,7 @@ bool DataFile::ReadNextRanged(double *val)
     if (ReadNext(&high)) return true;
 
     // m_RangeControl is normally from 0 to 1.0
-    *val = low + m_RangeControl * (high - low);
+    *val = low + m_rangeControl * (high - low);
     return false;
 }
 
@@ -895,7 +895,7 @@ bool DataFile::ReadNextLine(char *line, size_t size, bool ignoreEmpty, char comm
 // returns true on error
 bool DataFile::ReadNextLine(char *line, size_t size)
 {
-    char *p = m_Index;
+    char *p = m_index;
     char *c = line;
     size_t count = 0;
     size--; // needs to be shrunk to make room for the zero
@@ -907,7 +907,7 @@ bool DataFile::ReadNextLine(char *line, size_t size)
         if (count >= size)
         {
             *c = 0;
-            if (m_ExitOnErrorFlag)
+            if (m_exitOnErrorFlag)
             {
                 std::cerr << "Error: DataFile::ReadNextLine line longer than string\n";
                 exit(1);
@@ -920,7 +920,7 @@ bool DataFile::ReadNextLine(char *line, size_t size)
         c++;
         p++;
     }
-    m_Index = p;
+    m_index = p;
     *c = 0;
     return false;
 }
@@ -1166,90 +1166,90 @@ size_t DataFile::ReturnLines(char *string, char *ptrs[], size_t size)
 // read the next integer
 bool DataFile::ReadNextBinary(int *val)
 {
-    if (size_t(m_Index - m_FileData.get()) > m_Size - sizeof(int)) return true;
-    memcpy(reinterpret_cast<void *>((val)), m_Index, sizeof(int));
-    m_Index += sizeof(int);
+    if (size_t(m_index - m_fileData.get()) > m_size - sizeof(int)) return true;
+    memcpy(reinterpret_cast<void *>((val)), m_index, sizeof(int));
+    m_index += sizeof(int);
     return false;
 }
 
 // read the next float
 bool DataFile::ReadNextBinary(float *val)
 {
-    if (size_t(m_Index - m_FileData.get()) > m_Size - sizeof(float)) return true;
-    memcpy(reinterpret_cast<void *>((val)), m_Index, sizeof(float));
-    m_Index += sizeof(float);
+    if (size_t(m_index - m_fileData.get()) > m_size - sizeof(float)) return true;
+    memcpy(reinterpret_cast<void *>((val)), m_index, sizeof(float));
+    m_index += sizeof(float);
     return false;
 }
 
 // read the next double
 bool DataFile::ReadNextBinary(double *val)
 {
-    if (size_t(m_Index - m_FileData.get()) > m_Size - sizeof(double)) return true;
-    memcpy(reinterpret_cast<void *>((val)), m_Index, sizeof(double));
-    m_Index += sizeof(double);
+    if (size_t(m_index - m_fileData.get()) > m_size - sizeof(double)) return true;
+    memcpy(reinterpret_cast<void *>((val)), m_index, sizeof(double));
+    m_index += sizeof(double);
     return false;
 }
 
 // read the next char
 bool DataFile::ReadNextBinary(char *val)
 {
-    if (size_t(m_Index - m_FileData.get()) > m_Size - sizeof(char)) return true;
-    *val = *m_Index;
-    m_Index += sizeof(char);
+    if (size_t(m_index - m_fileData.get()) > m_size - sizeof(char)) return true;
+    *val = *m_index;
+    m_index += sizeof(char);
     return false;
 }
 
 // read the next bool
 bool DataFile::ReadNextBinary(bool *val)
 {
-    if (size_t(m_Index - m_FileData.get()) > m_Size - sizeof(bool)) return true;
-    memcpy(reinterpret_cast<void *>((val)), m_Index, sizeof(bool));
-    m_Index += sizeof(bool);
+    if (size_t(m_index - m_fileData.get()) > m_size - sizeof(bool)) return true;
+    memcpy(reinterpret_cast<void *>((val)), m_index, sizeof(bool));
+    m_index += sizeof(bool);
     return false;
 }
 
 // read the next integer array
 bool DataFile::ReadNextBinary(int *val, size_t n)
 {
-    if (size_t(m_Index - m_FileData.get()) > m_Size - sizeof(int) * n) return true;
-    memcpy(reinterpret_cast<void *>((val)), m_Index, sizeof(int) * n);
-    m_Index += sizeof(int) * n;
+    if (size_t(m_index - m_fileData.get()) > m_size - sizeof(int) * n) return true;
+    memcpy(reinterpret_cast<void *>((val)), m_index, sizeof(int) * n);
+    m_index += sizeof(int) * n;
     return false;
 }
 
 // read the next float array
 bool DataFile::ReadNextBinary(float *val, size_t n)
 {
-    if (size_t(m_Index - m_FileData.get()) > m_Size - sizeof(float) * n) return true;
-    memcpy(reinterpret_cast<void *>((val)), m_Index, sizeof(float) * n);
-    m_Index += sizeof(float) * n;
+    if (size_t(m_index - m_fileData.get()) > m_size - sizeof(float) * n) return true;
+    memcpy(reinterpret_cast<void *>((val)), m_index, sizeof(float) * n);
+    m_index += sizeof(float) * n;
     return false;
 }
 
 // read the next double array
 bool DataFile::ReadNextBinary(double *val, size_t n)
 {
-    if (size_t(m_Index - m_FileData.get()) > m_Size - sizeof(double) * n) return true;
-    memcpy(reinterpret_cast<void *>((val)), m_Index, sizeof(double) * n);
-    m_Index += sizeof(double) * n;
+    if (size_t(m_index - m_fileData.get()) > m_size - sizeof(double) * n) return true;
+    memcpy(reinterpret_cast<void *>((val)), m_index, sizeof(double) * n);
+    m_index += sizeof(double) * n;
     return false;
 }
 
 // read the next character array
 bool DataFile::ReadNextBinary(char *val, size_t n)
 {
-    if (size_t(m_Index - m_FileData.get()) > m_Size - sizeof(char) * n) return true;
-    memcpy(reinterpret_cast<void *>((val)), m_Index, sizeof(char) * n);
-    m_Index += sizeof(char) * n;
+    if (size_t(m_index - m_fileData.get()) > m_size - sizeof(char) * n) return true;
+    memcpy(reinterpret_cast<void *>((val)), m_index, sizeof(char) * n);
+    m_index += sizeof(char) * n;
     return false;
 }
 
 // read the next bool array
 bool DataFile::ReadNextBinary(bool *val, size_t n)
 {
-    if (size_t(m_Index - m_FileData.get()) > m_Size - sizeof(bool) * n) return true;
-    memcpy(reinterpret_cast<void *>((val)), m_Index, sizeof(bool) * n);
-    m_Index += sizeof(bool) * n;
+    if (size_t(m_index - m_fileData.get()) > m_size - sizeof(bool) * n) return true;
+    memcpy(reinterpret_cast<void *>((val)), m_index, sizeof(bool) * n);
+    m_index += sizeof(bool) * n;
     return false;
 }
 
@@ -1415,12 +1415,12 @@ bool DataFile::WriteNext(const char * const val, char after)
         size++;
     }
 
-    if (m_Index + size + 16 >= m_FileData.get() + m_Size)
+    if (m_index + size + 16 >= m_fileData.get() + m_size)
     {
-        auto p = std::make_unique<char[]>(m_Size + kStorageIncrement);
+        auto p = std::make_unique<char[]>(m_size + kStorageIncrement);
         if (p == nullptr)
         {
-            if (m_ExitOnErrorFlag)
+            if (m_exitOnErrorFlag)
             {
                 std::cerr << "Error: DataFile::WriteNext(" << val
                 << ") - could not allocate memory\n";
@@ -1431,18 +1431,18 @@ bool DataFile::WriteNext(const char * const val, char after)
                 return true;
             }
         }
-        memcpy(p.get(), m_FileData.get(), m_Size);
-        m_Index = p.get() + (m_Index - m_FileData.get());
-        m_FileData = std::move(p);
-        m_Size += kStorageIncrement;
+        memcpy(p.get(), m_fileData.get(), m_size);
+        m_index = p.get() + (m_index - m_fileData.get());
+        m_fileData = std::move(p);
+        m_size += kStorageIncrement;
     }
 
-    if (needQuotes) *m_Index++ = '"';
-    memcpy(m_Index, val, size);
-    m_Index += size;
-    if (needQuotes) *m_Index++ = '"';
-    if (after) *m_Index++ = after;
-    *m_Index = 0;
+    if (needQuotes) *m_index++ = '"';
+    memcpy(m_index, val, size);
+    m_index += size;
+    if (needQuotes) *m_index++ = '"';
+    if (after) *m_index++ = after;
+    *m_index = 0;
 
     return false;
 }
@@ -1463,12 +1463,12 @@ bool DataFile::WriteNextQuotedString(const char * const val, char after)
         size++;
     }
 
-    if (m_Index + size + 16 >= m_FileData.get() + m_Size)
+    if (m_index + size + 16 >= m_fileData.get() + m_size)
     {
-        auto p = std::make_unique<char[]>(m_Size + kStorageIncrement);
+        auto p = std::make_unique<char[]>(m_size + kStorageIncrement);
         if (p == nullptr)
         {
-            if (m_ExitOnErrorFlag)
+            if (m_exitOnErrorFlag)
             {
                 std::cerr << "Error: DataFile::WriteNext(" << val
                 << ") - could not allocate memory\n";
@@ -1479,18 +1479,18 @@ bool DataFile::WriteNextQuotedString(const char * const val, char after)
                 return true;
             }
         }
-        memcpy(p.get(), m_FileData.get(), m_Size);
-        m_Index = p.get() + (m_Index - m_FileData.get());
-        m_FileData = std::move(p);
-        m_Size += kStorageIncrement;
+        memcpy(p.get(), m_fileData.get(), m_size);
+        m_index = p.get() + (m_index - m_fileData.get());
+        m_fileData = std::move(p);
+        m_size += kStorageIncrement;
     }
 
-    *m_Index++ = '"';
-    memcpy(m_Index, val, size);
-    m_Index += size;
-    *m_Index++ = '"';
-    if (after) *m_Index++ = after;
-    *m_Index = 0;
+    *m_index++ = '"';
+    memcpy(m_index, val, size);
+    m_index += size;
+    *m_index++ = '"';
+    if (after) *m_index++ = after;
+    *m_index = 0;
 
     return false;
 }

@@ -48,7 +48,7 @@ void MergeXML::ExecuteInstructionFile(const char *bigString)
         for (unsigned int i = 0; i < m_oldStringList.size(); i++)
         {
             rCount = int(theFile.Replace(m_oldStringList[i].c_str(), m_newStringList[i].c_str()));
-            if (m_MergeXMLVerbosityLevel) std::cerr << "Replace \"" << m_oldStringList[i] <<
+            if (m_mergeXMLVerbosityLevel) std::cerr << "Replace \"" << m_oldStringList[i] <<
                 "\" with \"" << m_newStringList[i] << "\" Count = " << rCount << "\n";
         }
     }
@@ -59,10 +59,10 @@ void MergeXML::ExecuteInstructionFile(const char *bigString)
         strncpy(buffer, line, sizeof(buffer));
         numTokens = int(DataFile::ReturnTokens(buffer, tokens, sizeof(tokens)));
 
-        if (m_MergeXMLVerbosityLevel > 1)
+        if (m_mergeXMLVerbosityLevel > 1)
             std::cerr << "ExecuteInstructionFile:\tnumTokens\t" << numTokens << "\n";
 
-        if (m_MergeXMLVerbosityLevel) std::cerr << line << "\n";
+        if (m_mergeXMLVerbosityLevel) std::cerr << line << "\n";
 
         // read in a new XML file
         // ReadXMLFile XMLObjectName Filename

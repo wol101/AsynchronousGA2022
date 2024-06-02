@@ -35,10 +35,10 @@ private:
 
     void ConvertVectorBrackets();
 
-    std::string m_BaseXMLString;
-    std::vector<std::string> m_SmartSubstitutionTextComponents;
-    std::vector<std::string> m_SmartSubstitutionParserText;
-    std::vector<double> m_SmartSubstitutionValues;
+    std::string m_baseXMLString;
+    std::vector<std::string> m_smartSubstitutionTextComponents;
+    std::vector<std::string> m_smartSubstitutionParserText;
+    std::vector<double> m_smartSubstitutionValues;
 };
 
 

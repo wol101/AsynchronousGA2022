@@ -45,7 +45,7 @@ public:
     // ranged functions
     // the file is searched for the parameter and then the next token is read
     bool RetrieveRangedParameter(const char * const param, double *val, bool searchFromStart = true);
-    void SetRangeControl(double r) { m_RangeControl = r; }
+    void SetRangeControl(double r) { m_rangeControl = r; }
 
     // line reading functions
     // optional comment character and can ignore empty lines
@@ -59,18 +59,18 @@ public:
     bool RetrieveRangedParameter(const char * const param, size_t n, double *val, bool searchFromStart = true);
 
     // utility settings
-    void SetExitOnError(bool flag) { m_ExitOnErrorFlag = flag; }
-    bool GetExitOnError() { return m_ExitOnErrorFlag; }
-    char *GetRawData() { return m_FileData.get(); }
+    void SetExitOnError(bool flag) { m_exitOnErrorFlag = flag; }
+    bool GetExitOnError() { return m_exitOnErrorFlag; }
+    char *GetRawData() { return m_fileData.get(); }
     void SetRawData(const char *string, size_t stringLen);
-    void ResetIndex() { m_Index = m_FileData.get(); }
-    size_t GetSize() { return m_Size; }
+    void ResetIndex() { m_index = m_fileData.get(); }
+    size_t GetSize() { return m_size; }
     void ClearData();
     size_t Replace(const char *oldString, size_t oldLen, const char *newString, size_t newLen);
     size_t Replace(const std::string &oldString, const std::string &newString);
-    char *GetIndex() { return m_Index; }
-    void SetIndex(char *index) { m_Index = index; }
-    std::string GetPathName() { return m_PathName; }
+    char *GetIndex() { return m_index; }
+    void SetIndex(char *index) { m_index = index; }
+    std::string GetPathName() { return m_pathName; }
 
     // probably mostly for internal use
     // read the next ASCII token from the current index and bump index
@@ -138,18 +138,18 @@ public:
 
 private:
 
-    std::unique_ptr<char[]> m_FileData;
-    char *m_Index = nullptr;
-    bool m_ExitOnErrorFlag = false;
-    double m_RangeControl = false;
-    size_t m_Size = 0;
-    std::string m_PathName;
+    std::unique_ptr<char[]> m_fileData;
+    char *m_index = nullptr;
+    bool m_exitOnErrorFlag = false;
+    double m_rangeControl = false;
+    size_t m_size = 0;
+    std::string m_pathName;
 #if defined(_WIN32) || defined(WIN32)
     // provide Windows specific wchar versions
     bool ReadFile(const std::wstring &name);
     bool WriteFile(const std::wstring &name, bool binary = false);
-    std::wstring GetWPathName() { return m_WPathName; }
-    std::wstring m_WPathName;
+    std::wstring GetWPathName() { return m_wPathName; }
+    std::wstring m_wPathName;
 #endif
 };
 

@@ -24,26 +24,26 @@ Genome::Genome()
 
 Genome::Genome(const Genome &in)
 {
-    mGenes = in.mGenes;
-    mLowBounds = in.mLowBounds;
-    mHighBounds = in.mHighBounds;
-    mGaussianSDs = in.mGaussianSDs;
-    mCircularMutationFlags = in.mCircularMutationFlags;
-    mGenomeType = in.mGenomeType;
-    mGlobalCircularMutationFlag = in.mGlobalCircularMutationFlag;
-    mFitness = in.mFitness;
+    m_genes = in.m_genes;
+    m_lowBounds = in.m_lowBounds;
+    m_highBounds = in.m_highBounds;
+    m_gaussianSDs = in.m_gaussianSDs;
+    m_circularMutationFlags = in.m_circularMutationFlags;
+    m_genomeType = in.m_genomeType;
+    m_globalCircularMutationFlag = in.m_globalCircularMutationFlag;
+    m_fitness = in.m_fitness;
 }
 
 Genome::Genome(Genome &&in)
 {
-    mGenes = in.mGenes;
-    mLowBounds = in.mLowBounds;
-    mHighBounds = in.mHighBounds;
-    mGaussianSDs = in.mGaussianSDs;
-    mCircularMutationFlags = in.mCircularMutationFlags;
-    mGenomeType = in.mGenomeType;
-    mGlobalCircularMutationFlag = in.mGlobalCircularMutationFlag;
-    mFitness = in.mFitness;
+    m_genes = in.m_genes;
+    m_lowBounds = in.m_lowBounds;
+    m_highBounds = in.m_highBounds;
+    m_gaussianSDs = in.m_gaussianSDs;
+    m_circularMutationFlags = in.m_circularMutationFlags;
+    m_genomeType = in.m_genomeType;
+    m_globalCircularMutationFlag = in.m_globalCircularMutationFlag;
+    m_fitness = in.m_fitness;
 }
 
 // define = operators
@@ -51,14 +51,14 @@ Genome &Genome::operator=(const Genome &in)
 {
     if (&in != this)
     {
-        mGenes = in.mGenes;
-        mLowBounds = in.mLowBounds;
-        mHighBounds = in.mHighBounds;
-        mGaussianSDs = in.mGaussianSDs;
-        mCircularMutationFlags = in.mCircularMutationFlags;
-        mGenomeType = in.mGenomeType;
-        mGlobalCircularMutationFlag = in.mGlobalCircularMutationFlag;
-        mFitness = in.mFitness;
+        m_genes = in.m_genes;
+        m_lowBounds = in.m_lowBounds;
+        m_highBounds = in.m_highBounds;
+        m_gaussianSDs = in.m_gaussianSDs;
+        m_circularMutationFlags = in.m_circularMutationFlags;
+        m_genomeType = in.m_genomeType;
+        m_globalCircularMutationFlag = in.m_globalCircularMutationFlag;
+        m_fitness = in.m_fitness;
     }
     return *this;
 }
@@ -67,41 +67,41 @@ Genome &Genome::operator=(Genome &&in)
 {
     if (&in != this)
     {
-        mGenes = in.mGenes;
-        mLowBounds = in.mLowBounds;
-        mHighBounds = in.mHighBounds;
-        mGaussianSDs = in.mGaussianSDs;
-        mCircularMutationFlags = in.mCircularMutationFlags;
-        mGenomeType = in.mGenomeType;
-        mGlobalCircularMutationFlag = in.mGlobalCircularMutationFlag;
-        mFitness = in.mFitness;
+        m_genes = in.m_genes;
+        m_lowBounds = in.m_lowBounds;
+        m_highBounds = in.m_highBounds;
+        m_gaussianSDs = in.m_gaussianSDs;
+        m_circularMutationFlags = in.m_circularMutationFlags;
+        m_genomeType = in.m_genomeType;
+        m_globalCircularMutationFlag = in.m_globalCircularMutationFlag;
+        m_fitness = in.m_fitness;
     }
     return *this;
 }
 
 void Genome::Clear()
 {
-    mGenes.clear();
-    mLowBounds.clear();
-    mHighBounds.clear();
-    mGaussianSDs.clear();
-    mCircularMutationFlags.clear();
-    mGenomeType = IndividualRanges;
-    mGlobalCircularMutationFlag = false;
-    mFitness = -std::numeric_limits<double>::max();
+    m_genes.clear();
+    m_lowBounds.clear();
+    m_highBounds.clear();
+    m_gaussianSDs.clear();
+    m_circularMutationFlags.clear();
+    m_genomeType = IndividualRanges;
+    m_globalCircularMutationFlag = false;
+    m_fitness = -std::numeric_limits<double>::max();
 }
 
 // randomise the genome
 void Genome::Randomise(Random *random)
 {
-    switch (mGenomeType)
+    switch (m_genomeType)
     {
     case IndividualRanges:
     case IndividualCircularMutation:
-        for (size_t i = 0; i < mGenes.size(); i++)
+        for (size_t i = 0; i < m_genes.size(); i++)
         {
-            if (mGaussianSDs[i] != 0)
-                mGenes[i] = random->RandomDouble(mLowBounds[i], mHighBounds[i]);
+            if (m_gaussianSDs[i] != 0)
+                m_genes[i] = random->RandomDouble(m_lowBounds[i], m_highBounds[i]);
         }
         break;
     }
@@ -121,14 +121,14 @@ bool Genome::GetCircularMutation(int i)
 {
     bool v = 0;
 
-    switch (mGenomeType)
+    switch (m_genomeType)
     {
     case IndividualRanges:
-        v = mGlobalCircularMutationFlag;
+        v = m_globalCircularMutationFlag;
         break;
 
     case IndividualCircularMutation:
-        v = mCircularMutationFlags[i];
+        v = m_circularMutationFlags[i];
         break;
     }
 
@@ -138,14 +138,14 @@ bool Genome::GetCircularMutation(int i)
 // set the value of the circular mutation flag for a gene
 void Genome::SetCircularMutation(size_t i, bool circularFlag)
 {
-    switch (mGenomeType)
+    switch (m_genomeType)
     {
     case IndividualRanges:
-        mGlobalCircularMutationFlag = circularFlag;
+        m_globalCircularMutationFlag = circularFlag;
         break;
 
     case IndividualCircularMutation:
-        mCircularMutationFlags[i] = circularFlag;
+        m_circularMutationFlags[i] = circularFlag;
         break;
     }
 }
@@ -154,30 +154,30 @@ void Genome::SetCircularMutation(size_t i, bool circularFlag)
 // output to a stream
 std::ostream& operator<<(std::ostream &out, const Genome &g)
 {
-    switch (g.mGenomeType)
+    switch (g.m_genomeType)
     {
     case Genome::IndividualRanges:
-        out << g.mGenomeType << "\n";
-        out << g.mGenes.size() << "\n";
-        for (size_t i = 0; i < g.mGenes.size(); i++)
+        out << g.m_genomeType << "\n";
+        out << g.m_genes.size() << "\n";
+        for (size_t i = 0; i < g.m_genes.size(); i++)
         {
-            out << std::scientific << std::setprecision(18) << g.mGenes[i] << "\t" <<
-                   std::defaultfloat << std::setprecision(8) << g.mLowBounds[i] << "\t" <<
-                   g.mHighBounds[i] << "\t" << g.mGaussianSDs[i] << "\n";
+            out << std::scientific << std::setprecision(18) << g.m_genes[i] << "\t" <<
+                   std::defaultfloat << std::setprecision(8) << g.m_lowBounds[i] << "\t" <<
+                   g.m_highBounds[i] << "\t" << g.m_gaussianSDs[i] << "\n";
         }
-        out << std::scientific << std::setprecision(18) << g.mFitness << std::defaultfloat << "\t0\t0\t0\t0\n";
+        out << std::scientific << std::setprecision(18) << g.m_fitness << std::defaultfloat << "\t0\t0\t0\t0\n";
         break;
 
     case Genome::IndividualCircularMutation:
-        out << g.mGenomeType << "\n";
-        out << g.mGenes.size() << "\n";
-        for (size_t i = 0; i < g.mGenes.size(); i++)
+        out << g.m_genomeType << "\n";
+        out << g.m_genes.size() << "\n";
+        for (size_t i = 0; i < g.m_genes.size(); i++)
         {
-            out << std::scientific << std::setprecision(18) << g.mGenes[i] << "\t" <<
-                   std::defaultfloat << std::setprecision(8) << g.mLowBounds[i] << "\t" <<
-                   g.mHighBounds[i] << "\t" << g.mGaussianSDs[i] << "\t" << g.mCircularMutationFlags[i] << "\n";
+            out << std::scientific << std::setprecision(18) << g.m_genes[i] << "\t" <<
+                   std::defaultfloat << std::setprecision(8) << g.m_lowBounds[i] << "\t" <<
+                   g.m_highBounds[i] << "\t" << g.m_gaussianSDs[i] << "\t" << g.m_circularMutationFlags[i] << "\n";
         }
-        out << std::scientific << std::setprecision(18) << g.mFitness << std::defaultfloat << "\t0\t0\t0\t0\n";
+        out << std::scientific << std::setprecision(18) << g.m_fitness << std::defaultfloat << "\t0\t0\t0\t0\n";
         break;
     }
 
@@ -195,25 +195,25 @@ std::istream& operator>>(std::istream &in, Genome &g)
     in >> genomeLength;
 
     g.Clear();
-    g.mGenes.resize(genomeLength);
-    g.mLowBounds.resize(genomeLength);
-    g.mHighBounds.resize(genomeLength);
-    g.mGaussianSDs.resize(genomeLength);
-    g.mCircularMutationFlags.resize(genomeLength);
+    g.m_genes.resize(genomeLength);
+    g.m_lowBounds.resize(genomeLength);
+    g.m_highBounds.resize(genomeLength);
+    g.m_gaussianSDs.resize(genomeLength);
+    g.m_circularMutationFlags.resize(genomeLength);
 
-    g.mGenomeType = (Genome::GenomeType)genomeType;
-    switch (g.mGenomeType)
+    g.m_genomeType = (Genome::GenomeType)genomeType;
+    switch (g.m_genomeType)
     {
     case Genome::IndividualRanges:
         for (size_t i = 0; i < genomeLength; i++)
-            in >> g.mGenes[i] >> g.mLowBounds[i] >> g.mHighBounds[i] >> g.mGaussianSDs[i];
-        in >> g.mFitness >> dummy >> dummy >> dummy >> dummy;
+            in >> g.m_genes[i] >> g.m_lowBounds[i] >> g.m_highBounds[i] >> g.m_gaussianSDs[i];
+        in >> g.m_fitness >> dummy >> dummy >> dummy >> dummy;
         break;
 
     case Genome::IndividualCircularMutation:
         for (size_t i = 0; i < genomeLength; i++)
-            in >> g.mGenes[i] >> g.mLowBounds[i] >> g.mHighBounds[i] >> g.mGaussianSDs[i] >> g.mCircularMutationFlags[i];
-        in >> g.mFitness >> dummy >> dummy >> dummy >> dummy;
+            in >> g.m_genes[i] >> g.m_lowBounds[i] >> g.m_highBounds[i] >> g.m_gaussianSDs[i] >> g.m_circularMutationFlags[i];
+        in >> g.m_fitness >> dummy >> dummy >> dummy >> dummy;
         break;
 
     }

@@ -38,17 +38,17 @@ public:
 
     void InitialisePopulation(size_t populationSize, const Genome &genome);
 
-    Genome *GetFirstGenome() { return &m_Population.begin()->second; }
-    Genome *GetLastGenome() { return &m_Population.rbegin()->second; }
-    Genome *GetGenome(size_t i) { return &m_Population[m_PopulationIndex[i]]; }
-    size_t GetPopulationSize() { return m_Population.size(); }
+    Genome *GetFirstGenome() { return &m_population.begin()->second; }
+    Genome *GetLastGenome() { return &m_population.rbegin()->second; }
+    Genome *GetGenome(size_t i) { return &m_population[m_populationIndex[i]]; }
+    size_t GetPopulationSize() { return m_population.size(); }
 
-    void SetSelectionType(SelectionType type) { m_SelectionType = type; }
-    void SetParentsToKeep(size_t parentsToKeep) { m_ParentsToKeep = parentsToKeep; if (m_ParentsToKeep < 0) m_ParentsToKeep = 0; }
+    void SetSelectionType(SelectionType type) { m_selectionType = type; }
+    void SetParentsToKeep(size_t parentsToKeep) { m_parentsToKeep = parentsToKeep; if (m_parentsToKeep < 0) m_parentsToKeep = 0; }
     void SetGlobalCircularMutation(bool circularMutation);
-    void SetResizeControl(ResizeControl control) { m_ResizeControl = control; }
-    void SetGamma(double gamma) { m_Gamma = gamma; }
-    void SetMinimizeScore(bool minimizeScore) { m_MinimizeScore = minimizeScore; }
+    void SetResizeControl(ResizeControl control) { m_resizeControl = control; }
+    void SetGamma(double gamma) { m_gamma = gamma; }
+    void SetMinimizeScore(bool minimizeScore) { m_minimizeScore = minimizeScore; }
 
     Genome *ChooseParent(size_t *parentRank, Random *random);
     void Randomise(Random *random);
@@ -60,15 +60,15 @@ public:
 
 protected:
 
-    std::map<double, Genome> m_Population;
-    std::vector<double> m_PopulationIndex; // sorted vector
-    std::vector<double> m_ImmortalListIndex; // sorted vector
-    std::deque<double> m_AgeList;
-    SelectionType m_SelectionType = RankBasedSelection;
-    size_t m_ParentsToKeep = 0;
-    ResizeControl m_ResizeControl = MutateResize;
-    double m_Gamma = 1.0;
-    bool m_MinimizeScore = false;
+    std::map<double, Genome> m_population;
+    std::vector<double> m_populationIndex; // sorted vector
+    std::vector<double> m_immortalListIndex; // sorted vector
+    std::deque<double> m_ageList;
+    SelectionType m_selectionType = RankBasedSelection;
+    size_t m_parentsToKeep = 0;
+    ResizeControl m_resizeControl = MutateResize;
+    double m_gamma = 1.0;
+    bool m_minimizeScore = false;
 };
 
 

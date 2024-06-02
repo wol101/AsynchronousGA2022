@@ -37,26 +37,26 @@ int XMLConverter::LoadBaseXMLFile(const char *filename)
 
 void XMLConverter::Clear()
 {
-    m_SmartSubstitutionTextComponents.clear();
-    m_SmartSubstitutionParserText.clear();
-    m_SmartSubstitutionValues.clear();
-    m_BaseXMLString.clear();
+    m_smartSubstitutionTextComponents.clear();
+    m_smartSubstitutionParserText.clear();
+    m_smartSubstitutionValues.clear();
+    m_baseXMLString.clear();
 }
 
 // load the base XML for smart substitution file
 int XMLConverter::LoadBaseXMLString(const char *dataPtr, size_t length)
 {
-    m_SmartSubstitutionTextComponents.clear();
-    m_SmartSubstitutionParserText.clear();
-    m_SmartSubstitutionValues.clear();
-    m_BaseXMLString = std::string(dataPtr, length);
+    m_smartSubstitutionTextComponents.clear();
+    m_smartSubstitutionParserText.clear();
+    m_smartSubstitutionValues.clear();
+    m_baseXMLString = std::string(dataPtr, length);
 
     const char *ptr1 = dataPtr;
     const char *ptr2 = strstr(ptr1, "[[");
     while (ptr2)
     {
         std::string s(ptr1, static_cast<size_t>(ptr2 - ptr1));
-        m_SmartSubstitutionTextComponents.push_back(std::move(s));
+        m_smartSubstitutionTextComponents.push_back(std::move(s));
 
         ptr2 += 2;
         ptr1 = strstr(ptr2, "]]");
@@ -66,13 +66,13 @@ int XMLConverter::LoadBaseXMLString(const char *dataPtr, size_t length)
             exit(1);
         }
         std::string expressionParserText(ptr2, static_cast<size_t>(ptr1 - ptr2));
-        m_SmartSubstitutionParserText.push_back(std::move(expressionParserText));
-        m_SmartSubstitutionValues.push_back(0); // dummy values
+        m_smartSubstitutionParserText.push_back(std::move(expressionParserText));
+        m_smartSubstitutionValues.push_back(0); // dummy values
         ptr1 += 2;
         ptr2 = strstr(ptr1, "[[");
     }
     std::string s(ptr1);
-    m_SmartSubstitutionTextComponents.push_back(std::move(s));
+    m_smartSubstitutionTextComponents.push_back(std::move(s));
 
 
     // get the vector brackets in the right format for exprtk if necessary
@@ -85,11 +85,11 @@ void XMLConverter::GetFormattedXML(std::string *formattedXML)
 {
     std::ostringstream ss;
     ss.precision(17);
-    for (size_t i = 0; i < m_SmartSubstitutionValues.size(); i++)
+    for (size_t i = 0; i < m_smartSubstitutionValues.size(); i++)
     {
-        ss << m_SmartSubstitutionTextComponents[i] << m_SmartSubstitutionValues[i];
+        ss << m_smartSubstitutionTextComponents[i] << m_smartSubstitutionValues[i];
     }
-    ss << m_SmartSubstitutionTextComponents[m_SmartSubstitutionValues.size()];
+    ss << m_smartSubstitutionTextComponents[m_smartSubstitutionValues.size()];
     *formattedXML = ss.str();
 }
 
@@ -101,7 +101,7 @@ int XMLConverter::ApplyGenome(int genomeSize, double *genomeData)
     exprtk::expression<double> expression;
     exprtk::parser<double> parser;
 
-    for (unsigned int i = 0; i < m_SmartSubstitutionParserText.size(); i++)
+    for (unsigned int i = 0; i < m_smartSubstitutionParserText.size(); i++)
     {
         // set up the genome as a function g(locus) and evaluate
 
@@ -110,19 +110,19 @@ int XMLConverter::ApplyGenome(int genomeSize, double *genomeData)
 
         expression.register_symbol_table(symbol_table);
 
-//        std::cerr << "substitution text " << i << ": " << *m_SmartSubstitutionParserText[i] << "\n";
-        bool success = parser.compile(m_SmartSubstitutionParserText[i], expression);
+//        std::cerr << "substitution text " << i << ": " << *m_smartSubstitutionParserText[i] << "\n";
+        bool success = parser.compile(m_smartSubstitutionParserText[i], expression);
 
         if (success)
         {
-            m_SmartSubstitutionValues[i] = expression.value();
+            m_smartSubstitutionValues[i] = expression.value();
 //            std::cerr << "substitution value " << i << " = " << m_SmartSubstitutionValues[i] << "\n";
         }
         else
         {
             std::cerr << "Error: XMLConverter::ApplyGenome m_SmartSubstitutionParserComponents[" << i << "] does not evaluate to a number\n";
             std::cerr << "Applying standard fix up and setting to zero\n";
-            m_SmartSubstitutionValues[i] = 0;
+            m_smartSubstitutionValues[i] = 0;
         }
     }
 
@@ -135,9 +135,9 @@ void XMLConverter::ConvertVectorBrackets()
 {
     int pCount;
     unsigned int j;
-    for (unsigned int i = 0; i < m_SmartSubstitutionParserText.size(); i++)
+    for (unsigned int i = 0; i < m_smartSubstitutionParserText.size(); i++)
     {
-        std::string &s = m_SmartSubstitutionParserText[i];
+        std::string &s = m_smartSubstitutionParserText[i];
         j = 0;
         while (j < s.size())
         {
@@ -175,7 +175,7 @@ void XMLConverter::ConvertVectorBrackets()
 
 const std::string &XMLConverter::BaseXMLString() const
 {
-    return m_BaseXMLString;
+    return m_baseXMLString;
 }
 
 

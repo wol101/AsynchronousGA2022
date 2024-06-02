@@ -37,7 +37,7 @@ private:
     std::map<int, std::string> m_errorMessageList;
     std::map<std::string, double> m_globalVariablesList;
 
-    int m_MergeXMLVerbosityLevel = 0;
+    int m_mergeXMLVerbosityLevel = 0;
 };
 
 

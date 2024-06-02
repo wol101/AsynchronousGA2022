@@ -31,7 +31,7 @@ public:
 
 private:
 
-   std::vector<std::unique_ptr<XMLContainer>> mListObjects;
+   std::vector<std::unique_ptr<XMLContainer>> m_listObjects;
 };
 
 #endif

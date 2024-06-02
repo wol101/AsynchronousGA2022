@@ -288,8 +288,8 @@ int GAMain::Evolve()
     Genome *parent1;
     Genome *parent2;
     TenPercentiles tenPercentiles;
-    double maxFitness = -DBL_MAX;
-    double lastMaxFitness = -DBL_MAX;
+    double bestFitness = m_preferences.minimizeScore ? std::numeric_limits<double>::max(): -std::numeric_limits<double>::max();
+    double lastBestFitness = m_preferences.minimizeScore ? std::numeric_limits<double>::max(): -std::numeric_limits<double>::max();
     std::string filename;
     bool stopSendingFlag = false;
     std::map<uint32_t, std::unique_ptr<RunSpecifier>> runningList;
@@ -466,9 +466,10 @@ int GAMain::Evolve()
 
             if (returnCount % uint32_t(m_preferences.saveBestEvery) == uint32_t(m_preferences.saveBestEvery) - 1 || returnCount == 1)
             {
-                if (m_evolvePopulation.GetLastGenome()->GetFitness() > maxFitness)
+                if ((m_preferences.minimizeScore && m_evolvePopulation.GetLastGenome()->GetFitness() < bestFitness) ||
+                    (!m_preferences.minimizeScore && m_evolvePopulation.GetLastGenome()->GetFitness() > bestFitness))
                 {
-                    maxFitness = m_evolvePopulation.GetLastGenome()->GetFitness();
+                    bestFitness = m_evolvePopulation.GetLastGenome()->GetFitness();
                     filename = pystring::os::path::join(m_outputFolderName, ToString(m_bestGenomeModel.c_str(), returnCount));
                     try
                     {
@@ -488,7 +489,7 @@ int GAMain::Evolve()
                     {
                         ReportProgress("Error writing "s + filename, 0);
                     }
-                    ReportInfo(ToString("Best Score = %g", maxFitness));
+                    ReportInfo(ToString("Best Score = %g", bestFitness));
                 }
             }
 
@@ -502,9 +503,9 @@ int GAMain::Evolve()
 
             if (returnCount % uint32_t(m_preferences.improvementReproductions) == uint32_t(m_preferences.improvementReproductions) - 1)
             {
-                ReportProgress(ToString("Fitness change for %d reproductions is %g", m_preferences.improvementReproductions, maxFitness - lastMaxFitness), 2);
-                if ( maxFitness - lastMaxFitness < m_preferences.improvementThreshold ) stopSendingFlag = true; // it will now quit
-                lastMaxFitness = maxFitness;
+                ReportProgress(ToString("Fitness change for %d reproductions is %g", m_preferences.improvementReproductions, std::abs(bestFitness - lastBestFitness)), 2);
+                if (std::abs(bestFitness - lastBestFitness) < m_preferences.improvementThreshold ) stopSendingFlag = true; // it will now quit
+                lastBestFitness = bestFitness;
             }
 
             returnCount++;
@@ -519,7 +520,8 @@ int GAMain::Evolve()
 
     if (m_evolvePopulation.GetPopulationSize())
     {
-        if (m_evolvePopulation.GetLastGenome()->GetFitness() > maxFitness)
+        if ((m_preferences.minimizeScore && m_evolvePopulation.GetLastGenome()->GetFitness() < bestFitness) ||
+            (!m_preferences.minimizeScore && m_evolvePopulation.GetLastGenome()->GetFitness() > bestFitness))
         {
             filename = pystring::os::path::join(m_outputFolderName, ToString(m_bestGenomeModel.c_str(), returnCount));
             if (!std::filesystem::exists(filename))

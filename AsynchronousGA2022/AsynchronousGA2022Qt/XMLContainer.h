@@ -27,8 +27,8 @@ public:
     XMLContainer();
     ~XMLContainer();
 
-    void SetName(const char *name) { m_Name = name; }
-    const char *GetName() { return m_Name.c_str(); }
+    void SetName(const char *name) { m_name = name; }
+    const char *GetName() { return m_name.c_str(); }
 
     char *DoXmlGetProp(rapidxml::xml_node<char> *cur, const char *name);
     rapidxml::xml_attribute<char> *DoXmlReplaceProp(rapidxml::xml_node<char> *cur, const char *name, const char *newValue);
@@ -56,16 +56,16 @@ private:
     void RecoverExpressions(char *dataPtr);
     static void ReplaceChar(char *p1, size_t len, char c1, char c2);
 
-    rapidxml::xml_document<char> *m_Doc = nullptr;
-    DataFile *m_DocFile = nullptr;
+    rapidxml::xml_document<char> *m_doc = nullptr;
+    DataFile *m_docFile = nullptr;
 
-    std::string m_RootNode;
-    std::vector<rapidxml::xml_node<char> *> m_TagContentsList;
+    std::string m_rootNode;
+    std::vector<rapidxml::xml_node<char> *> m_tagContentsList;
 
-    std::string m_Name;
+    std::string m_name;
 
-    bool m_CaseSensitiveXMLAttributes = true;
-    int m_XMLContainerVerbosityLevel = 1;
+    bool m_caseSensitiveXMLAttributes = true;
+    int m_xmkContainerVerbosityLevel = 1;
 
 };
 

@@ -30,24 +30,24 @@ public:
     {
         IndividualRanges = -1,
         IndividualCircularMutation = -2
-    };    
+    };
 
-    double GetGene(size_t i) const { return mGenes[i]; }
-    size_t GetGenomeLength() const { return mGenes.size(); }
-    double GetHighBound(size_t i) const { return mHighBounds[i]; }
-    double GetLowBound(size_t i) const { return mLowBounds[i]; }
-    double GetGaussianSD(size_t i) const { return mGaussianSDs[i]; }
-    double GetFitness() const { return mFitness; }
-    GenomeType GetGenomeType() const { return mGenomeType; }
-    std::vector<double> *GetGenes() { return &mGenes; }
+    double GetGene(size_t i) const { return m_genes[i]; }
+    size_t GetGenomeLength() const { return m_genes.size(); }
+    double GetHighBound(size_t i) const { return m_highBounds[i]; }
+    double GetLowBound(size_t i) const { return m_lowBounds[i]; }
+    double GetGaussianSD(size_t i) const { return m_gaussianSDs[i]; }
+    double GetFitness() const { return m_fitness; }
+    GenomeType GetGenomeType() const { return m_genomeType; }
+    std::vector<double> *GetGenes() { return &m_genes; }
     bool GetCircularMutation(int i);
-    bool GetGlobalCircularMutationFlag() { return mGlobalCircularMutationFlag; }
+    bool GetGlobalCircularMutationFlag() { return m_globalCircularMutationFlag; }
 
     void Randomise(Random *random);
-    void SetGene(size_t i, double value) { mGenes[i] = value; }
-    void SetFitness(double fitness) { mFitness = fitness; }
+    void SetGene(size_t i, double value) { m_genes[i] = value; }
+    void SetFitness(double fitness) { m_fitness = fitness; }
     void SetCircularMutation(size_t i, bool circularFlag);
-    void SetGlobalCircularMutationFlag(bool circularFlag) { mGlobalCircularMutationFlag = circularFlag; }
+    void SetGlobalCircularMutationFlag(bool circularFlag) { m_globalCircularMutationFlag = circularFlag; }
     void Clear();
 
     bool operator<(const Genome &in);
@@ -57,16 +57,14 @@ public:
 
 private:
 
-    std::vector<double> mGenes;
-    std::vector<double> mLowBounds;
-    std::vector<double> mHighBounds;
-    std::vector<double> mGaussianSDs;
-    std::vector<char> mCircularMutationFlags;
-    GenomeType mGenomeType = IndividualRanges;
-    bool mGlobalCircularMutationFlag = false;
-    double mFitness = -std::numeric_limits<double>::max();
+    std::vector<double> m_genes;
+    std::vector<double> m_lowBounds;
+    std::vector<double> m_highBounds;
+    std::vector<double> m_gaussianSDs;
+    std::vector<char> m_circularMutationFlags;
+    GenomeType m_genomeType = IndividualRanges;
+    bool m_globalCircularMutationFlag = false;
+    double m_fitness = -std::numeric_limits<double>::max();
 };
-
-//bool GenomeFitnessLessThan(Genome *g1, Genome *g2);
 
 #endif // GENOME_H
