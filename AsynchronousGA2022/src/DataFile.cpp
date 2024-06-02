@@ -136,22 +136,22 @@ bool DataFile::ReadFile(const std::string &name)
     int error;
 
     ClearData();
-    m_PathName = name;
+    m_pathName = name;
 
     error = stat(name.c_str(), &fileStat);
-    if (error && m_ExitOnErrorFlag)
+    if (error && m_exitOnErrorFlag)
     {
         std::cerr << "Error: DataFile::ReadFile(" << name << ") - Cannot stat file\n";
         exit(1);
     }
     if (error) return true;
-    m_FileData = std::make_unique<char[]>(size_t(fileStat.st_size) + 1);
-    m_Index = m_FileData.get();
-    m_Size = size_t(fileStat.st_size);
-    m_FileData[m_Size] = 0;
+    m_fileData = std::make_unique<char[]>(size_t(fileStat.st_size) + 1);
+    m_index = m_fileData.get();
+    m_size = size_t(fileStat.st_size);
+    m_fileData[m_size] = 0;
 
     in = fopen(name.c_str(), "rb");
-    if (in == nullptr && m_ExitOnErrorFlag)
+    if (in == nullptr && m_exitOnErrorFlag)
     {
         std::cerr << "Error: DataFile::ReadFile(" << name << ") - Cannot open file\n";
         exit(1);
@@ -162,8 +162,8 @@ bool DataFile::ReadFile(const std::string &name)
         read_block = (size_t(fileStat.st_size) - index);
         if (read_block > max_read_block) read_block = max_read_block;
         count = read_block;
-        count = fread(m_FileData.get() + index, count, 1, in);
-        if (count != 1 && m_ExitOnErrorFlag)
+        count = fread(m_fileData.get() + index, count, 1, in);
+        if (count != 1 && m_exitOnErrorFlag)
         {
             std::cerr << "Error: DataFile::ReadFile(" << name << ") - Cannot read file\n";
             exit(1);
@@ -191,7 +191,7 @@ bool DataFile::WriteFile(const std::string &name, bool binary)
 
     if (out == nullptr)
     {
-        if (m_ExitOnErrorFlag)
+        if (m_exitOnErrorFlag)
         {
             std::cerr << "Error: DataFile::WriteFile(" << name << ") - Cannot open file\n";
             exit(1);
@@ -200,12 +200,12 @@ bool DataFile::WriteFile(const std::string &name, bool binary)
     }
 
     // write file
-    if (binary) count = fwrite(m_FileData.get(), m_Size, 1, out);
-    else count = fwrite(m_FileData.get(), strlen(m_FileData.get()), 1, out);
+    if (binary) count = fwrite(m_fileData.get(), m_size, 1, out);
+    else count = fwrite(m_fileData.get(), strlen(m_fileData.get()), 1, out);
 
     if (count != 1)
     {
-        if (m_ExitOnErrorFlag)
+        if (m_exitOnErrorFlag)
         {
             std::cerr << "Error: DataFile::WriteFile(" << name << ") - Cannot write file\n";
             exit(1);
@@ -215,7 +215,7 @@ bool DataFile::WriteFile(const std::string &name, bool binary)
 
     if (fclose(out))
     {
-        if (m_ExitOnErrorFlag)
+        if (m_exitOnErrorFlag)
         {
             std::cerr << "Error: DataFile::WriteFile(" << name << ") - Cannot close file\n";
             exit(1);
