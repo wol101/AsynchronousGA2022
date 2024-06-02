@@ -35,8 +35,6 @@ public:
     int LoadBaseXMLFile(const std::string &filename);
     int Process(const std::string &parameterFile, const std::string &outputDirectory, const std::string &startingPopulation);
 
-    static void ApplyGenome(const std::string &inputGenome, const std::string &inputXML, const std::string &outputXML);
-
     void SetLogLevel(int logLevel) { m_logLevel = logLevel; }
     void SetServerPort(int port);
 

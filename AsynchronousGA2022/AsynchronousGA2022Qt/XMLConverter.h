@@ -26,21 +26,23 @@ public:
     int LoadBaseXMLString(const char *dataPtr, size_t length);
     int ApplyGenome(int genomeSize, double *genomeData);
     void GetFormattedXML(std::string *formattedXML);
+    void SetStartEndMarkers(const std::string &startMarker, const std::string &endMarker);
 
     const std::string &BaseXMLString() const;
 
     void Clear();
 
     static void ApplyGenome(const std::string &inputGenome, const std::string &inputXML, const std::string &outputXML);
+    static std::string DecodeXMLExtities(const std::string &input);
 
 private:
-
-    void ConvertVectorBrackets();
 
     std::string m_baseXMLString;
     std::vector<std::string> m_smartSubstitutionTextComponents;
     std::vector<std::string> m_smartSubstitutionParserText;
     std::vector<double> m_smartSubstitutionValues;
+    std::string m_startMarker = {"[["};
+    std::string m_endMarker = {"]]"};
 };
 
 

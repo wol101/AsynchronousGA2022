@@ -52,10 +52,6 @@ public:
     int Merge(rapidxml::xml_node<char> *node1, rapidxml::xml_node<char> *node2, double proportion, const char *name, int startIndex, int endIndex);
 
 private:
-    void CleanExpressions(char *dataPtr);
-    void RecoverExpressions(char *dataPtr);
-    static void ReplaceChar(char *p1, size_t len, char c1, char c2);
-
     rapidxml::xml_document<char> *m_doc = nullptr;
     DataFile *m_docFile = nullptr;
 

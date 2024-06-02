@@ -111,6 +111,7 @@ std::string Preferences::GetPreferencesString()
     out << "watchDogTimerLimit " << watchDogTimerLimit << "\n";
     out << "circularMutation " << circularMutation << "\n";
     out << "bounceMutation " << bounceMutation << "\n";
+    out << "minimizeScore " << minimizeScore << "\n";
 
     switch (parentSelection)
     {

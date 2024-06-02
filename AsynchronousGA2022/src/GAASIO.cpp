@@ -14,7 +14,6 @@
 #include "Random.h"
 #include "Statistics.h"
 #include "GAASIO.h"
-#include "XMLConverter.h"
 #include "MD5.h"
 #include "ServerASIO.h"
 #include "ArgParse.h"
@@ -25,15 +24,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <sstream>
 #include <iomanip>
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/timeb.h>
-#include <queue>
 #include <map>
-#include <cfloat>
-//#include <unistd.h>
 #include <algorithm>
 #include <cstdarg>
 #include <thread>
@@ -560,35 +555,6 @@ int GAMain::Evolve()
     ClearScoreQueue();
 
     return 0;
-}
-
-void GAMain::ApplyGenome(const std::string &inputGenome, const std::string &inputXML, const std::string &outputXML)
-{
-    DataFile genomeData;
-    double val;
-    int ival, genomeSize;
-    genomeData.ReadFile(inputGenome);
-    genomeData.ReadNext(&ival);
-    genomeData.ReadNext(&genomeSize);
-    std::vector<double> data;
-    data.reserve(size_t(genomeSize));
-    for (int i = 0; i < genomeSize; i++)
-    {
-        genomeData.ReadNext(&val);
-        data.push_back(val);
-        genomeData.ReadNext(&val); genomeData.ReadNext(&val); genomeData.ReadNext(&val);
-        if (ival == -2) genomeData.ReadNext(&val); // skip the extra parameter
-    }
-
-    XMLConverter myXMLConverter;
-    myXMLConverter.LoadBaseXMLFile(inputXML.c_str());
-    myXMLConverter.ApplyGenome(genomeSize, data.data());
-    std::string formatedXML;
-    myXMLConverter.GetFormattedXML(&formatedXML);
-
-    DataFile outputXMLData;
-    outputXMLData.SetRawData(formatedXML.data(), formatedXML.size());
-    outputXMLData.WriteFile(outputXML);
 }
 
 void GAMain::SetServerPort(int port)

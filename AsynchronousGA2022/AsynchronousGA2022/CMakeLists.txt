@@ -17,7 +17,6 @@ add_executable(AsynchronousGA2022
     ../src/Random.cpp
     ../src/ServerASIO.cpp
     ../src/Statistics.cpp
-    ../src/XMLConverter.cpp
     ../pystring/pystring.cpp
     ../src/ArgParse.h
     ../src/DataFile.h
@@ -30,22 +29,14 @@ add_executable(AsynchronousGA2022
     ../src/Random.h
     ../src/ServerASIO.h
     ../src/Statistics.h
-    ../src/XMLConverter.h
     ../asio-1.18.2/include/asio.hpp
-    ../exprtk/exprtk.hpp
     ../pystring/pystring.h
-    ../rapidxml-1.13/rapidxml.hpp
-    ../rapidxml-1.13/rapidxml_iterators.hpp
-    ../rapidxml-1.13/rapidxml_print.hpp
-    ../rapidxml-1.13/rapidxml_utils.hpp
 )
 
 target_include_directories(AsynchronousGA2022 PRIVATE
     ../src
     ../asio-1.18.2/include
-    ../exprtk
     ../pystring
-    ../rapidxml-1.13
 )
 
 if (MSVC)

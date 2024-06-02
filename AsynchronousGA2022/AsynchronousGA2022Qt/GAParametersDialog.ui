@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>579</width>
-    <height>618</height>
+    <height>646</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -440,41 +440,6 @@
             <string>Switches</string>
            </property>
            <layout class="QGridLayout" name="gridLayout">
-            <item row="1" column="0">
-             <widget class="QCheckBox" name="checkBoxCircularMutation">
-              <property name="text">
-               <string>Circular Mutation</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QCheckBox" name="checkBoxRandomiseModel">
-              <property name="text">
-               <string>Randomise Starting Model</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QCheckBox" name="checkBoxOnlyKeepBestPopulation">
-              <property name="text">
-               <string>Only Keep Best Population</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QCheckBox" name="checkBoxBounceMutation">
-              <property name="text">
-               <string>Bounce Mutation</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QCheckBox" name="checkBoxMultipleGaussian">
-              <property name="text">
-               <string>Multiple Gaussian</string>
-              </property>
-             </widget>
-            </item>
             <item row="4" column="0">
              <widget class="QCheckBox" name="checkBoxOnlyKeepBestGenome">
               <property name="text">
@@ -486,6 +451,41 @@
              <widget class="QCheckBox" name="checkBoxMinimizeScore">
               <property name="text">
                <string>Minimize Score</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QCheckBox" name="checkBoxOnlyKeepBestPopulation">
+              <property name="text">
+               <string>Only Keep Best Population</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="checkBoxCircularMutation">
+              <property name="text">
+               <string>Circular Mutation</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="checkBoxBounceMutation">
+              <property name="text">
+               <string>Bounce Mutation</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QCheckBox" name="checkBoxRandomiseModel">
+              <property name="text">
+               <string>Randomise Starting Model</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="checkBoxMultipleGaussian">
+              <property name="text">
+               <string>Multiple Gaussian</string>
               </property>
              </widget>
             </item>

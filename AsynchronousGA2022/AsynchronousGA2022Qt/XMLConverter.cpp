@@ -11,14 +11,12 @@
 #include "DataFile.h"
 
 #include "exprtk.hpp"
+#include "pystring.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <sstream>
-#include <cfloat>
-#include <cmath>
-#include <assert.h>
 #include <iostream>
 #include <sstream>
 
@@ -52,31 +50,27 @@ int XMLConverter::LoadBaseXMLString(const char *dataPtr, size_t length)
     m_baseXMLString = std::string(dataPtr, length);
 
     const char *ptr1 = dataPtr;
-    const char *ptr2 = strstr(ptr1, "[[");
+    const char *ptr2 = strstr(ptr1, m_startMarker.c_str());
     while (ptr2)
     {
         std::string s(ptr1, static_cast<size_t>(ptr2 - ptr1));
         m_smartSubstitutionTextComponents.push_back(std::move(s));
 
         ptr2 += 2;
-        ptr1 = strstr(ptr2, "]]");
+        ptr1 = strstr(ptr2, m_endMarker.c_str());
         if (ptr1 == nullptr)
         {
-            std::cerr << "Error: could not find matching ]]\n";
+            std::cerr << "Error: could not find matching " << m_endMarker << "\n";
             exit(1);
         }
-        std::string expressionParserText(ptr2, static_cast<size_t>(ptr1 - ptr2));
+        std::string expressionParserText = DecodeXMLExtities(std::string(ptr2, static_cast<size_t>(ptr1 - ptr2)));
         m_smartSubstitutionParserText.push_back(std::move(expressionParserText));
         m_smartSubstitutionValues.push_back(0); // dummy values
         ptr1 += 2;
-        ptr2 = strstr(ptr1, "[[");
+        ptr2 = strstr(ptr1, m_startMarker.c_str());
     }
     std::string s(ptr1);
     m_smartSubstitutionTextComponents.push_back(std::move(s));
-
-
-    // get the vector brackets in the right format for exprtk if necessary
-    ConvertVectorBrackets();
 
     return 0;
 }
@@ -129,50 +123,6 @@ int XMLConverter::ApplyGenome(int genomeSize, double *genomeData)
     return 0;
 }
 
-// exprtk requires [] around vector indices whereas my parser used ()
-// this routine converts the brackets around the g vector
-void XMLConverter::ConvertVectorBrackets()
-{
-    int pCount;
-    unsigned int j;
-    for (unsigned int i = 0; i < m_smartSubstitutionParserText.size(); i++)
-    {
-        std::string &s = m_smartSubstitutionParserText[i];
-        j = 0;
-        while (j < s.size())
-        {
-            if (s[j] == 'g')
-            {
-                j++;
-                if (j >= s.size()) break;
-                while (j < s.size())
-                {
-                    if (s[j] < 33) j++; // this just skips any whitespace
-                    else break;
-                }
-                if (j >= s.size()) break;
-                if (s[j] == '(')
-                {
-                    s[j] = '[';
-                    pCount = 1;
-                    while (j < s.size())
-                    {
-                        if (s[j] == '(') pCount++;
-                        if (s[j] == ')') pCount--;
-                        if (pCount <= 0)
-                        {
-                            s[j] = ']';
-                            break;
-                        }
-                        j++;
-                    }
-                }
-            }
-            j++;
-        }
-    }
-}
-
 const std::string &XMLConverter::BaseXMLString() const
 {
     return m_baseXMLString;
@@ -205,5 +155,22 @@ void XMLConverter::ApplyGenome(const std::string &inputGenome, const std::string
     DataFile outputXMLData;
     outputXMLData.SetRawData(formatedXML.data(), formatedXML.size());
     outputXMLData.WriteFile(outputXML);
+}
+
+std::string XMLConverter::DecodeXMLExtities(const std::string &input)
+{
+    std::string result = input;
+    static const std::map<std::string, std::string> decoder = { {"&amp;", "&"},  {"&gt;", ">"},  {"&lt;", "<"},  {"&quot;", "\""} };
+    for (auto &&it : decoder)
+    {
+        result = pystring::replace(result, it.first, it.second);
+    }
+    return result;
+}
+
+void XMLConverter::SetStartEndMarkers(const std::string &startMarker, const std::string &endMarker)
+{
+    m_startMarker = startMarker;
+    m_endMarker = endMarker;
 }
 

@@ -19,12 +19,10 @@
 #include <map>
 #include <string>
 #include <sstream>
-#include <float.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string.h>
-#include <memory>
 
 
 XMLContainer::XMLContainer()
@@ -51,7 +49,6 @@ int XMLContainer::LoadXML(const char *filename)
     if (m_docFile->ReadFile(filename)) return 1;
 
     char *data = m_docFile->GetRawData();
-    CleanExpressions(data);
 
     // do the basic XML parsing
     m_doc->parse<rapidxml::parse_default>(data);
@@ -93,15 +90,14 @@ int XMLContainer::WriteXML(const char *filename)
     outputStream << "</" << m_rootNode << ">\n\n";
 
     std::string buf = outputStream.str();
-    RecoverExpressions(&buf[0]);
 
     try
     {
-    std::ofstream outputFile;
-    outputFile.exceptions(std::ios::failbit|std::ios::badbit);
-    outputFile.open(filename, std::ios::out | std::ios::binary);
-    outputFile.write(buf.c_str(), std::streamsize(buf.size()));
-    outputFile.close();
+        std::ofstream outputFile;
+        outputFile.exceptions(std::ios::failbit|std::ios::badbit);
+        outputFile.open(filename, std::ios::out | std::ios::binary);
+        outputFile.write(buf.c_str(), std::streamsize(buf.size()));
+        outputFile.close();
     }
     catch (...)
     {
@@ -292,59 +288,6 @@ int XMLContainer::Merge(rapidxml::xml_node<char> *node1, rapidxml::xml_node<char
     return 0;
 }
 
-void XMLContainer::CleanExpressions(char *dataPtr)
-{
-    char *ptr1 = dataPtr;
-
-    char *ptr2 = strstr(ptr1, "[[");
-    while (ptr2)
-    {
-        ptr2 += 2;
-        ptr1 = strstr(ptr2, "]]");
-        if (ptr2 == nullptr)
-        {
-            std::cerr << "Error: could not find matching ]]\n";
-            exit(1);
-        }
-
-        ReplaceChar(ptr2, ptr1 - ptr2, '<', '{');
-        ReplaceChar(ptr2, ptr1 - ptr2, '>', '}');
-        ReplaceChar(ptr2, ptr1 - ptr2, '&', '#');
-
-        ptr1 += 2;
-        ptr2 = strstr(ptr1, "[[");
-    }
-}
-
-void XMLContainer::RecoverExpressions(char *dataPtr)
-{
-    char *ptr1 = dataPtr;
-
-    char *ptr2 = strstr(ptr1, "[[");
-    while (ptr2)
-    {
-        ptr2 += 2;
-        ptr1 = strstr(ptr2, "]]");
-        if (ptr2 == nullptr)
-        {
-            std::cerr << "Error: could not find matching ]]\n";
-            exit(1);
-        }
-
-        ReplaceChar(ptr2, ptr1 - ptr2, '{', '<');
-        ReplaceChar(ptr2, ptr1 - ptr2, '}', '>');
-        ReplaceChar(ptr2, ptr1 - ptr2, '#', '&');
-
-        ptr1 += 2;
-        ptr2 = strstr(ptr1, "[[");
-    }
-}
-
-void XMLContainer::ReplaceChar(char *p1, size_t len, char c1, char c2)
-{
-    for (size_t i = 0; i < len; i++)
-        if (p1[i] == c1) p1[i] = c2;
-}
 
 // returns zero on success
 int XMLContainer::Operate(const char *operation, const char *element, const char *idAttribute, const char *idValue, const char *changeAttribute, int offset, std::map<std::string, double> *extraVariables)
