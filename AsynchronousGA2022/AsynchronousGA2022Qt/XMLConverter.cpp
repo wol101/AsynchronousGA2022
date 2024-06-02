@@ -128,7 +128,7 @@ const std::string &XMLConverter::BaseXMLString() const
     return m_baseXMLString;
 }
 
-void XMLConverter::ApplyGenome(const std::string &inputGenome, const std::string &inputXML, const std::string &outputXML)
+void XMLConverter::ApplyGenome(const std::string &inputGenome, const std::string &inputXML, const std::string &outputXML, const std::string &startMarker, const std::string &endMarker)
 {
     DataFile genomeData;
     double val;
@@ -147,6 +147,7 @@ void XMLConverter::ApplyGenome(const std::string &inputGenome, const std::string
     }
 
     XMLConverter myXMLConverter;
+    myXMLConverter.SetStartEndMarkers(startMarker, endMarker);
     myXMLConverter.LoadBaseXMLFile(inputXML.c_str());
     myXMLConverter.ApplyGenome(genomeSize, data.data());
     std::string formatedXML;

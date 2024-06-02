@@ -541,12 +541,8 @@ void AsynchronousGAQtWidget::runGaitSym()
     QString inputXML = dir.filePath("workingConfig.xml");
     QFileInfo inputGenomeFile(inputGenome);
     QString outputXML = dir.filePath(inputGenomeFile.completeBaseName() + QString(".xml"));
-    XMLConverter::ApplyGenome(inputGenome.toStdString(), inputXML.toStdString(), outputXML.toStdString()); // FIX ME - this is needed probably
+    XMLConverter::ApplyGenome(inputGenome.toStdString(), inputXML.toStdString(), outputXML.toStdString(), m_startExpressionMarker, m_endExpressionMarker);
     QString modelStateFileName = dir.filePath("ModelState.xml");
-//    QFile configFile(outputXML);
-//    configFile.open(QFile::ReadOnly);
-//    QByteArray data = configFile.readAll();
-//    configFile.close();
 
     QString gaitSymExecutable = ui->lineEditGaitSymExecutable->text();
     QFileInfo gaitSymExecutableInfo(gaitSymExecutable);

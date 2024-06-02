@@ -32,7 +32,7 @@ public:
 
     void Clear();
 
-    static void ApplyGenome(const std::string &inputGenome, const std::string &inputXML, const std::string &outputXML);
+    static void ApplyGenome(const std::string &inputGenome, const std::string &inputXML, const std::string &outputXML, const std::string &startMarker, const std::string &endMarker);
     static std::string DecodeXMLExtities(const std::string &input);
 
 private:
