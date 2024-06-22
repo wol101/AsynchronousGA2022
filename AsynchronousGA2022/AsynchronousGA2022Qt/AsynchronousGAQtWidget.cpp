@@ -492,7 +492,7 @@ void AsynchronousGAQtWidget::runMergeXML()
     QString newMergeXML = QDir(outputFolder).filePath("workingMergeXML.txt");
     QFile file(newMergeXML);
     file.open(QFile::WriteOnly);
-    file.write(replace4.toUtf8());
+    file.write(replace5.toUtf8());
     file.close();
     QString mergeXMLStatusFile = QDir(outputFolder).filePath("mergeXMLStatus.txt");
     QFile file2(mergeXMLStatusFile);
